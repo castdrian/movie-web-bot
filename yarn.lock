@@ -130,6 +130,11 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz#b520529ec21d8e5945a1851dfd1c32e94e39ff45"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
 
+"@ltd/j-toml@^1.38.0":
+  version "1.38.0"
+  resolved "https://registry.yarnpkg.com/@ltd/j-toml/-/j-toml-1.38.0.tgz#00d19f6d65ac5dac39bc64f97a545f47e9ebefc4"
+  integrity sha512-lYtBcmvHustHQtg4X7TXUu1Xa/tbLC3p2wLvgQI+fWVySguVZJF60Snxijw5EiohumxZbR10kWYFFebh1zotiw==
+
 "@movie-web/providers@^0.0.6":
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/@movie-web/providers/-/providers-0.0.6.tgz#caa6959697928fcc829745d616b8f8fbfa267b26"

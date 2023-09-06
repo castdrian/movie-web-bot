@@ -20,6 +20,7 @@
     "docker:start": "yarn start"
   },
   "dependencies": {
+    "@ltd/j-toml": "^1.38.0",
     "@movie-web/providers": "^0.0.6",
     "@sapphire/decorators": "^6.0.1",
     "@sapphire/framework": "^4.5.1",
