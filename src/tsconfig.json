@@ -3,12 +3,13 @@
 	"compilerOptions": {
 		"rootDir": "./",
 		"outDir": "../dist",
-		"module": "ESNext",
 		"target": "ESNext",
 		"composite": true,
 		"preserveConstEnums": true,
 		"ignoreDeprecations": "5.0",
 		"skipLibCheck": true,
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true,
 		"typeRoots": ["node_modules/@types"],
 		"paths": {
 			"#src/*": ["./*"],
