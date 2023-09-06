@@ -5,10 +5,12 @@ import { AutocompleteInteraction, CommandInteraction } from 'discord.js';
 export class AvailableCommand extends Command {
 	public override async chatInputRun(interaction: CommandInteraction) {
 		try {
-			const { name, value } = interaction.options.get('title', true);
+			if (!interaction.isChatInputCommand()) return;
+			const identifier = interaction.options.getString('title', true);
 
-			const media = await fetchMedia(name, value as string);
+			const media = await fetchMedia(identifier);
 			if (!media) return interaction.reply({ content: 'No results found', ephemeral: true });
+			this.container.client.logger.info(media);
 			await interaction.deferReply();
 			await checkAvailability(media, interaction);
 		} catch (ex) {
