@@ -133,8 +133,8 @@ async function makeResponseEmbed(
 	posterPath: string
 ): Promise<void> {
 	console.log(sources, results);
+	const success = true;
 	const embed = {
-		// test embed
 		title: `${media.title} (${media.releaseYear})`,
 		description: `\`FlixHQ\` <:xmark:1149017090670465054>\n\`SuperStream\` <a:aLoading:1149016985699627018>\n\`GoMovies\` <:slash:1149017166478327900>`,
 		color: 0xa87fd1,
@@ -145,7 +145,11 @@ async function makeResponseEmbed(
 			name: `movie-web`,
 			icon_url: `https://github.com/movie-web/movie-web/blob/dev/public/android-chrome-512x512.png?raw=true`
 		},
-		url: `https://movie-web.app/media/tmdb-${media.type}-${media.tmdbId}`
+		url: `https://movie-web.app/media/tmdb-${media.type}-${media.tmdbId}`,
+		timestamp: new Date().toISOString(),
+		footer: {
+			text: `${success ? '✅' : '❌'} | found ${sources.length} video${sources.length === 1 ? '' : 's'}`
+		}
 	} satisfies APIEmbed;
 	await interaction.editReply({ embeds: [embed] });
 }
