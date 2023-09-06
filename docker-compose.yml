@@ -8,5 +8,5 @@ services:
       target: base
     volumes:
       - ./:/home/node/app
-    container_name: movie-web-bot
+    container_name: mw-bot
     command: yarn docker:start
