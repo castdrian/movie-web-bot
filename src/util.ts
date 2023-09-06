@@ -11,7 +11,7 @@ export async function searchTitle(query: string): Promise<ApplicationCommandOpti
 
 		if (!results.length) return [{ name: 'No results found', value: 'empty' }];
 
-		return results.map((result) => {
+		return results.slice(0, 25).map((result) => {
 			if (result.media_type === 'tv') {
 				return { name: result.name, value: result.id.toString() };
 			}
