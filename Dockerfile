@@ -1,5 +1,5 @@
 # Base layer
-FROM node:lts-alpine as base
+FROM node:20.5.1-alpine as base
 WORKDIR /home/node/app
 
 # Build layer (everything besides build output & node_modules can be discarded from this)
