@@ -1,10 +1,26 @@
-import { searchTitle } from '#src/util';
+import { checkAvailability, fetchMedia, searchTitle } from '#src/util';
 import { Command } from '@sapphire/framework';
 import { AutocompleteInteraction, CommandInteraction } from 'discord.js';
 
 export class AvailableCommand extends Command {
 	public override async chatInputRun(interaction: CommandInteraction) {
-		await interaction.reply('pong');
+		try {
+			const { name, value } = interaction.options.get('title', true);
+
+			const media = await fetchMedia(name, value as string);
+			if (!media) return interaction.reply({ content: 'No results found', ephemeral: true });
+			await interaction.deferReply();
+			await checkAvailability(media, interaction);
+		} catch (ex) {
+			interaction.client.logger.error(ex);
+
+			if (interaction.replied) {
+				await interaction.followUp({ content: 'Something went wrong', ephemeral: true });
+			}
+
+			await interaction.reply({ content: 'Something went wrong', ephemeral: true });
+		}
+		return undefined;
 	}
 
 	public override async autocompleteRun(interaction: AutocompleteInteraction) {
