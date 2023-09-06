@@ -1,5 +1,5 @@
 {
-  "name": "movie-web",
+  "name": "movie-web-bot",
   "version": "1.0.0",
   "description": "movie-web discord bot",
   "main": "dist/main.js",
@@ -7,6 +7,7 @@
   "author": "castdrian <adrifcastr@gmail.com>",
   "license": "MIT",
   "type": "module",
+  "private": true,
   "scripts": {
     "lint": "eslint src tests --ext ts --fix",
     "format": "prettier --write {src,tests}/**/*.ts",
