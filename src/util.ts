@@ -91,8 +91,8 @@ function transformSearchResultToScrapeMedia(type: 'tv' | 'movie', result: TvShow
 				tmdbId: ''
 			},
 			season: {
-				number: 1,
-				tmdbId: ''
+				number: tvResult.seasons[0].season_number,
+				tmdbId: tvResult.seasons[0].id.toString()
 			}
 		};
 	}
