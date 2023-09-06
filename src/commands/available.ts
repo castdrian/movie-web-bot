@@ -10,7 +10,7 @@ export class AvailableCommand extends Command {
 
 			const media = await fetchMedia(identifier);
 			if (!media) return interaction.reply({ content: 'No results found', ephemeral: true });
-			this.container.client.logger.info(media);
+
 			await interaction.deferReply();
 			await checkAvailability(media, interaction);
 		} catch (ex) {

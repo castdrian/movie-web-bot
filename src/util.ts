@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionChoiceData, CommandInteraction } from 'discord.js';
+import { APIEmbed, ApplicationCommandOptionChoiceData, Collection, CommandInteraction } from 'discord.js';
 import { MovieDetails, TMDB, TvShowDetails } from 'tmdb-ts';
 import { config } from '#src/config';
 import { RunnerOptions, ScrapeMedia, makeProviders, makeStandardFetcher } from '@movie-web/providers';
@@ -30,6 +30,8 @@ export async function searchTitle(query: string): Promise<ApplicationCommandOpti
 export async function fetchMedia(identifier: string): Promise<ScrapeMedia | undefined> {
 	try {
 		const [type, id] = identifier.split(':');
+		if (id === 'empty') return;
+
 		let result: TvShowDetails | MovieDetails;
 
 		switch (type) {
@@ -53,12 +55,15 @@ export async function fetchMedia(identifier: string): Promise<ScrapeMedia | unde
 
 export async function checkAvailability(media: ScrapeMedia, interaction: CommandInteraction): Promise<void> {
 	const providers = makeProviders({ fetcher: makeStandardFetcher(fetch as any) });
+	const cache = new Collection<string, any>();
 
 	const options: RunnerOptions = {
 		media,
 		events: {
 			init(e) {
 				console.log('init', e);
+				cache.set('sources', e.sourceIds);
+				void makeResponseEmbed(e.sourceIds, {}, interaction);
 			},
 			start(e) {
 				console.log('start', e);
@@ -73,9 +78,23 @@ export async function checkAvailability(media: ScrapeMedia, interaction: Command
 	};
 
 	const results = await providers.runAll(options);
-	if (!results) return;
-	console.log(results);
-	await interaction.editReply('pong');
+
+	if (results) {
+		const components = [
+			{
+				type: 1,
+				components: [
+					{
+						type: 2,
+						label: 'watch on movie-web',
+						style: 5,
+						url: `https://movie-web.app/media/tmdb-${media.type}-${media.tmdbId}`
+					}
+				]
+			}
+		];
+		await interaction.editReply({ components });
+	}
 }
 
 function transformSearchResultToScrapeMedia(type: 'tv' | 'movie', result: TvShowDetails | MovieDetails): ScrapeMedia {
@@ -107,4 +126,23 @@ function transformSearchResultToScrapeMedia(type: 'tv' | 'movie', result: TvShow
 	}
 
 	throw new Error('Invalid type parameter');
+}
+
+async function makeResponseEmbed(sources: string[], results: Record<string, string>, interaction: CommandInteraction): Promise<void> {
+	console.log(sources, results);
+	const embed = {
+		// mock embed
+		description:
+			'`Searching Earth Arcade (2022) (ID: 203508)`\n\n\n`FlixHQ` <:xmark:1149017090670465054>\n`SuperStream` <a:aLoading:1149016985699627018>\n`GoMovies` <:slash:1149017166478327900>',
+		color: 0xa87fd1,
+		thumbnail: {
+			url: `https://www.themoviedb.org/t/p/w1280/vBJ0uF0WlFcjr9obZZqE6GSsKoL.jpg`
+		},
+		author: {
+			name: `movie-web`,
+			icon_url: `https://github.com/movie-web/movie-web/blob/dev/public/android-chrome-512x512.png?raw=true`
+		},
+		url: `https://movie-web.app`
+	} satisfies APIEmbed;
+	await interaction.editReply({ embeds: [embed] });
 }
