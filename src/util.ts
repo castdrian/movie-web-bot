@@ -27,7 +27,7 @@ export async function searchTitle(query: string): Promise<ApplicationCommandOpti
 	}
 }
 
-export async function fetchMedia(identifier: string): Promise<ScrapeMedia | undefined> {
+export async function fetchMedia(identifier: string): Promise<{ type: 'movie' | 'tv'; result: TvShowDetails | MovieDetails } | undefined> {
 	try {
 		const [type, id] = identifier.split(':');
 		if (id === 'empty') return;
@@ -46,16 +46,16 @@ export async function fetchMedia(identifier: string): Promise<ScrapeMedia | unde
 		}
 
 		if (!result) return;
-		return transformSearchResultToScrapeMedia(type, result);
+		return { type, result };
 	} catch (ex) {
 		console.log(ex);
 		return undefined;
 	}
 }
 
-export async function checkAvailability(media: ScrapeMedia, interaction: CommandInteraction): Promise<void> {
+export async function checkAvailability(media: ScrapeMedia, posterPath: string, interaction: CommandInteraction): Promise<void> {
 	const providers = makeProviders({ fetcher: makeStandardFetcher(fetch as any) });
-	const cache = new Collection<string, any>();
+	const cache = new Collection<string, string[]>();
 
 	const options: RunnerOptions = {
 		media,
@@ -63,16 +63,13 @@ export async function checkAvailability(media: ScrapeMedia, interaction: Command
 			init(e) {
 				console.log('init', e);
 				cache.set('sources', e.sourceIds);
-				void makeResponseEmbed(e.sourceIds, {}, interaction);
+				void makeResponseEmbed(e.sourceIds, {}, interaction, media, posterPath);
 			},
 			start(e) {
 				console.log('start', e);
 			},
 			update(e) {
 				console.log('update', e);
-			},
-			discoverEmbeds(e) {
-				console.log('discoverEmbeds', e);
 			}
 		}
 	};
@@ -97,7 +94,7 @@ export async function checkAvailability(media: ScrapeMedia, interaction: Command
 	}
 }
 
-function transformSearchResultToScrapeMedia(type: 'tv' | 'movie', result: TvShowDetails | MovieDetails): ScrapeMedia {
+export function transformSearchResultToScrapeMedia(type: 'tv' | 'movie', result: TvShowDetails | MovieDetails): ScrapeMedia {
 	if (type === 'tv') {
 		const tvResult = result as TvShowDetails;
 		return {
@@ -128,21 +125,31 @@ function transformSearchResultToScrapeMedia(type: 'tv' | 'movie', result: TvShow
 	throw new Error('Invalid type parameter');
 }
 
-async function makeResponseEmbed(sources: string[], results: Record<string, string>, interaction: CommandInteraction): Promise<void> {
+async function makeResponseEmbed(
+	sources: string[],
+	results: Record<string, string>,
+	interaction: CommandInteraction,
+	media: ScrapeMedia,
+	posterPath: string
+): Promise<void> {
 	console.log(sources, results);
 	const embed = {
-		// mock embed
-		description:
-			'`Searching Earth Arcade (2022) (ID: 203508)`\n\n\n`FlixHQ` <:xmark:1149017090670465054>\n`SuperStream` <a:aLoading:1149016985699627018>\n`GoMovies` <:slash:1149017166478327900>',
+		// test embed
+		title: `${media.title} (${media.releaseYear})`,
+		description: `\`FlixHQ\` <:xmark:1149017090670465054>\n\`SuperStream\` <a:aLoading:1149016985699627018>\n\`GoMovies\` <:slash:1149017166478327900>`,
 		color: 0xa87fd1,
 		thumbnail: {
-			url: `https://www.themoviedb.org/t/p/w1280/vBJ0uF0WlFcjr9obZZqE6GSsKoL.jpg`
+			url: getMediaPoster(posterPath)
 		},
 		author: {
 			name: `movie-web`,
 			icon_url: `https://github.com/movie-web/movie-web/blob/dev/public/android-chrome-512x512.png?raw=true`
 		},
-		url: `https://movie-web.app`
+		url: `https://movie-web.app/media/tmdb-${media.type}-${media.tmdbId}`
 	} satisfies APIEmbed;
 	await interaction.editReply({ embeds: [embed] });
+}
+
+function getMediaPoster(posterPath: string): string {
+	return `https://image.tmdb.org/t/p/w185/${posterPath}`;
 }

@@ -1,4 +1,4 @@
-import { checkAvailability, fetchMedia, searchTitle } from '#src/util';
+import { checkAvailability, fetchMedia, searchTitle, transformSearchResultToScrapeMedia } from '#src/util';
 import { Command } from '@sapphire/framework';
 import { AutocompleteInteraction, CommandInteraction } from 'discord.js';
 
@@ -10,9 +10,12 @@ export class AvailableCommand extends Command {
 
 			const media = await fetchMedia(identifier);
 			if (!media) return interaction.reply({ content: 'No results found', ephemeral: true });
-
 			await interaction.deferReply();
-			await checkAvailability(media, interaction);
+
+			const { type, result } = media;
+			const scrapeMedia = transformSearchResultToScrapeMedia(type, result);
+
+			await checkAvailability(scrapeMedia, result.backdrop_path, interaction);
 		} catch (ex) {
 			interaction.client.logger.error(ex);
 
