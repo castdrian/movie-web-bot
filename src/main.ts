@@ -1,7 +1,10 @@
 import { GatewayIntentBits } from 'discord.js';
 import { LogLevel, SapphireClient } from '@sapphire/framework';
-import '@sapphire/plugin-logger/register';
+import { ApplicationCommandRegistries } from '@sapphire/framework';
 import { config } from '#src/config';
+import '@sapphire/plugin-logger/register';
+
+ApplicationCommandRegistries.setDefaultGuildIds([config.guildId]);
 
 const client = new SapphireClient({
 	shards: 'auto',
