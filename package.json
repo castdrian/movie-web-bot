@@ -34,7 +34,6 @@
   },
   "devDependencies": {
     "@sapphire/eslint-config": "^5.0.2",
-    "@sapphire/prettier-config": "^2.0.0",
     "@sapphire/ts-config": "^5.0.0",
     "@types/node": "^20.5.9",
     "@typescript-eslint/eslint-plugin": "^6.6.0",
@@ -54,7 +53,6 @@
   "lint-staged": {
     "*.{mjs,js,ts}": "eslint --fix --ext mjs,js,ts"
   },
-  "prettier": "@sapphire/prettier-config",
   "imports": {
     "#src/*": "./dist/*.js"
   }

@@ -264,13 +264,6 @@
     "@sapphire/timestamp" "^1.0.1"
     colorette "^2.0.20"
 
-"@sapphire/prettier-config@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@sapphire/prettier-config/-/prettier-config-2.0.0.tgz#f56888ad05709f61954c6f24334b7443d844bf12"
-  integrity sha512-Vie8KR5zQ6sbEP4+biW/IR7k55saGfZkTSuRlgvxCBKb4SBJdRWcOBI80i+JxMVIDDZKgXlgYnXEST+FgZiWXA==
-  dependencies:
-    prettier "^3.0.0"
-
 "@sapphire/ratelimits@^2.4.6":
   version "2.4.6"
   resolved "https://registry.yarnpkg.com/@sapphire/ratelimits/-/ratelimits-2.4.6.tgz#9a936b451a9090ed574409e4dc0af000952792f8"
@@ -2289,7 +2282,7 @@ prettier-linter-helpers@^1.0.0:
   dependencies:
     fast-diff "^1.1.2"
 
-prettier@^3.0.0, prettier@^3.0.2, prettier@^3.0.3:
+prettier@^3.0.2, prettier@^3.0.3:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.0.3.tgz#432a51f7ba422d1469096c0fdc28e235db8f9643"
   integrity sha512-L/4pUDMxcNa8R/EthV08Zt42WBO4h1rarVtK0K+QJG0X187OLo7l699jWw0GKuwzkPQ//jMFA/8Xm6Fh3J/DAg==

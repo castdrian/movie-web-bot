@@ -7,11 +7,11 @@ import '@sapphire/plugin-logger/register';
 ApplicationCommandRegistries.setDefaultGuildIds([config.guildId]);
 
 const client = new SapphireClient({
-	shards: 'auto',
-	intents: [GatewayIntentBits.Guilds],
-	logger: {
-		level: LogLevel.Debug
-	}
+  shards: 'auto',
+  intents: [GatewayIntentBits.Guilds],
+  logger: {
+    level: LogLevel.Debug,
+  },
 });
 
 if (!config.discordToken) process.exit(0);
