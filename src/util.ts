@@ -32,8 +32,7 @@ export async function searchTitle(query: string): Promise<ApplicationCommandOpti
 			const identifier = `${result.media_type}:${result.id}`;
 			if (result.media_type === 'tv') {
 				return { name: result.name, value: identifier };
-			}
-			if (result.media_type === 'movie') {
+			} else if (result.media_type === 'movie') {
 				return { name: result.title, value: identifier };
 			}
 			return { name: 'No results found', value: 'empty' };
@@ -175,8 +174,7 @@ export function transformSearchResultToScrapeMedia(type: 'tv' | 'movie', result:
 				tmdbId: tvResult.seasons[0].id.toString()
 			}
 		};
-	}
-	if (type === 'movie') {
+	} else if (type === 'movie') {
 		const movieResult = result as MovieDetails;
 		return {
 			type: 'movie',
