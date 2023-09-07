@@ -64,22 +64,56 @@ export async function checkAvailability(media: ScrapeMedia, posterPath: string, 
 		media,
 		events: {
 			init(e) {
-				console.log('init', e);
 				cache.setSources(e.sourceIds);
+				cache.setStatus(e.sourceIds.map((id) => ({ id, status: Status.WAITING, current: false })));
 				void makeResponseEmbed(cache, interaction);
 			},
 			start(e) {
-				console.log('start', e);
+				const status = cache.getStatus();
+				if (!status) return;
+				const sourceStatus = status.find((s) => s.id === e);
+				if (!sourceStatus) return;
+				sourceStatus.status = Status.LOADING;
+
+				status.forEach((s) => {
+					if (s.id === e) return;
+					s.current = false;
+				});
+				sourceStatus.current = true;
+
+				cache.setStatus(status);
 				void makeResponseEmbed(cache, interaction);
 			},
 			update(e) {
-				console.log('update', e);
+				const status = cache.getStatus();
+				if (!status) return;
+				// const sourceStatus = status.find((s) => s.id === e.id);
+				const sourceStatus = status.find((s) => s.current);
+				if (!sourceStatus) return;
+
+				switch (e.status) {
+					case 'success':
+						sourceStatus.status = Status.SUCCESS;
+						break;
+					case 'failure':
+						sourceStatus.status = Status.FAILURE;
+						break;
+					case 'notfound':
+						sourceStatus.status = Status.FAILURE;
+						break;
+					case 'pending':
+						sourceStatus.status = Status.LOADING;
+						break;
+				}
+
+				cache.setStatus(status);
 				void makeResponseEmbed(cache, interaction);
 			}
 		}
 	};
 
 	const results = await providers.runAll(options);
+	const status = cache.getStatus();
 
 	if (results) {
 		const components = [
@@ -97,6 +131,16 @@ export async function checkAvailability(media: ScrapeMedia, posterPath: string, 
 		];
 		await interaction.editReply({ components });
 	}
+
+	if (status) {
+		status.forEach((s) => {
+			if (s.status === Status.LOADING) s.status = Status.SUCCESS;
+		});
+		cache.setStatus(status);
+	}
+
+	const videos = status?.filter((s) => s.status === Status.SUCCESS).length;
+	if (videos) cache.setVideos(videos);
 
 	await makeResponseEmbed(cache, interaction, Boolean(results));
 }
@@ -135,18 +179,24 @@ export function transformSearchResultToScrapeMedia(type: 'tv' | 'movie', result:
 async function makeResponseEmbed(cache: CacheCollection, interaction: CommandInteraction, success?: boolean): Promise<void> {
 	const sources = cache.getSources();
 	const media = cache.getMedia();
+	const status = cache.getStatus();
 
-	if (!sources?.length || !media) {
+	if (!sources?.length || !media || !status) {
 		return void interaction.editReply('An error occurred while collecting providers.');
 	}
 
+	const description = sources
+		.map((source) => {
+			const sourceStatus = status.find((s) => s.id === source);
+			if (!sourceStatus) return undefined;
+			return `\`${source}\` ${getStatusEmote(sourceStatus.status, interaction.guild!)}`;
+		})
+		.filter((s) => s)
+		.join('\n');
+
 	const embed = {
 		title: `${media.title} (${media.releaseYear})`,
-		description: `\`FlixHQ\` ${getStatusEmote(StatusEmotes.FAILURE, interaction.guild!)}\n\`SuperStream\` ${getStatusEmote(
-			StatusEmotes.LOADING,
-			interaction.guild!
-		)}\n\`GoMovies\` ${getStatusEmote(StatusEmotes.WAITING, interaction.guild!)}`,
-		color: 0xa87fd1,
+		description,
 		thumbnail: {
 			url: getMediaPoster(cache.getPosterPath()!)
 		},
@@ -173,22 +223,28 @@ function getMediaPoster(posterPath: string): string {
 	return `https://image.tmdb.org/t/p/w185/${posterPath}`;
 }
 
-enum StatusEmotes {
+enum Status {
 	WAITING,
 	LOADING,
 	SUCCESS,
 	FAILURE
 }
 
-function getStatusEmote(status: StatusEmotes, guild: Guild): GuildEmoji {
+interface ProviderStatus {
+	id: string;
+	status: Status;
+	current: boolean;
+}
+
+function getStatusEmote(status: Status, guild: Guild): GuildEmoji {
 	switch (status) {
-		case StatusEmotes.WAITING:
+		case Status.WAITING:
 			return guild.emojis.cache.find((emoji) => emoji.name === 'slash')!;
-		case StatusEmotes.LOADING:
+		case Status.LOADING:
 			return guild.emojis.cache.find((emoji) => emoji.name === 'loading')!;
-		case StatusEmotes.SUCCESS:
+		case Status.SUCCESS:
 			return guild.emojis.cache.find((emoji) => emoji.name === 'check')!;
-		case StatusEmotes.FAILURE:
+		case Status.FAILURE:
 			return guild.emojis.cache.find((emoji) => emoji.name === 'error')!;
 	}
 }
@@ -200,6 +256,14 @@ class CacheCollection extends Collection<string, any> {
 
 	public getSources(): string[] | undefined {
 		return this.get('sources') as string[] | undefined;
+	}
+
+	public getStatus(): ProviderStatus[] | undefined {
+		return this.get('status') as ProviderStatus[] | undefined;
+	}
+
+	public setStatus(value: ProviderStatus[]) {
+		this.set('status', value);
 	}
 
 	public setVideos(value: number) {
