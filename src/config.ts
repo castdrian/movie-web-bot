@@ -7,7 +7,8 @@ import { readFileSync } from 'node:fs';
 const schema = z.object({
 	discordToken: z.string(),
 	guildId: z.string(),
-	tmdbApiKey: z.string()
+	tmdbApiKey: z.string(),
+	tagRefreshUrl: z.string()
 });
 
 const prefix = 'CONF_';
@@ -28,7 +29,7 @@ export const statusEmojiIds = {
 
 export const config = createConfigLoader().addFromFile('.env', { prefix }).addFromEnvironment(prefix).addZodSchema(schema).load();
 
-interface TagStore {
+export interface TagStore {
 	tags: Record<string, string>;
 }
 

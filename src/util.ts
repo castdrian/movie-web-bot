@@ -1,9 +1,24 @@
 import { APIEmbed, ApplicationCommandOptionChoiceData, Client, Collection, CommandInteraction, GuildEmoji } from 'discord.js';
 import { MovieDetails, TMDB, TvShowDetails } from 'tmdb-ts';
-import { Status, config, statusEmojiIds } from '#src/config';
+import { Status, TagStore, config, statusEmojiIds, tagCache } from '#src/config';
 import { RunnerOptions, ScrapeMedia, makeProviders, makeStandardFetcher } from '@movie-web/providers';
+import TOML from '@ltd/j-toml';
 
 const tmdb = new TMDB(config.tmdbApiKey);
+
+export async function updateCacheFromRemote() {
+	const res = await fetch(config.tagRefreshUrl)
+		.then((res) => res.text())
+		.catch(() => null);
+
+	if (!res) return;
+
+	const tagsStore = TOML.parse(res) as unknown as TagStore;
+
+	for (const [key, value] of Object.entries(tagsStore.tags)) {
+		tagCache.set(key, value);
+	}
+}
 
 export async function searchTitle(query: string): Promise<ApplicationCommandOptionChoiceData[]> {
 	try {
