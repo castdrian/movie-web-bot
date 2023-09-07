@@ -55,7 +55,10 @@ export async function fetchMedia(identifier: string): Promise<{ type: 'movie' | 
 
 export async function checkAvailability(media: ScrapeMedia, posterPath: string, interaction: CommandInteraction): Promise<void> {
 	const providers = makeProviders({ fetcher: makeStandardFetcher(fetch as any) });
-	const cache = new Collection<string, string[]>();
+	const cache = new CacheCollection();
+
+	cache.setMedia(media);
+	cache.setPosterPath(posterPath);
 
 	const options: RunnerOptions = {
 		media,
@@ -63,13 +66,15 @@ export async function checkAvailability(media: ScrapeMedia, posterPath: string, 
 			init(e) {
 				console.log('init', e);
 				cache.set('sources', e.sourceIds);
-				void makeResponseEmbed(e.sourceIds, {}, interaction, media, posterPath, cache);
+				void makeResponseEmbed(cache, interaction);
 			},
 			start(e) {
 				console.log('start', e);
+				void makeResponseEmbed(cache, interaction);
 			},
 			update(e) {
 				console.log('update', e);
+				void makeResponseEmbed(cache, interaction);
 			}
 		}
 	};
@@ -93,7 +98,7 @@ export async function checkAvailability(media: ScrapeMedia, posterPath: string, 
 		await interaction.editReply({ components });
 	}
 
-	await makeResponseEmbed(cache.get('sources') ?? [], {}, interaction, media, posterPath, cache, Boolean(results));
+	await makeResponseEmbed(cache, interaction, Boolean(results));
 }
 
 export function transformSearchResultToScrapeMedia(type: 'tv' | 'movie', result: TvShowDetails | MovieDetails): ScrapeMedia {
@@ -127,18 +132,11 @@ export function transformSearchResultToScrapeMedia(type: 'tv' | 'movie', result:
 	throw new Error('Invalid type parameter');
 }
 
-async function makeResponseEmbed(
-	sources: string[],
-	results: Record<string, string>,
-	interaction: CommandInteraction,
-	media: ScrapeMedia,
-	posterPath: string,
-	cache: Collection<string, string[]>,
-	success?: boolean
-): Promise<void> {
-	console.log(sources, results);
+async function makeResponseEmbed(cache: CacheCollection, interaction: CommandInteraction, success?: boolean): Promise<void> {
+	const sources = cache.getSources();
+	const media = cache.getMedia();
 
-	if (!sources.length) {
+	if (!sources?.length || !media) {
 		return void interaction.editReply('An error occurred while collecting providers.');
 	}
 
@@ -150,7 +148,7 @@ async function makeResponseEmbed(
 		)}\n\`GoMovies\` ${getStatusEmote(StatusEmotes.WAITING, interaction.guild!)}`,
 		color: 0xa87fd1,
 		thumbnail: {
-			url: getMediaPoster(posterPath)
+			url: getMediaPoster(cache.getPosterPath()!)
 		},
 		author: {
 			name: `movie-web`,
@@ -162,7 +160,7 @@ async function makeResponseEmbed(
 		...(success !== undefined
 			? {
 					footer: {
-						text: `${results ? '✅' : '❌'} | found ${cache.get('videos')?.length ?? 0} video${
+						text: `${success ? '✅' : '❌'} | found ${cache.get('videos')?.length ?? 0} video${
 							cache.get('videos')?.length === 1 ? '' : 's'
 						}`
 					}
@@ -194,5 +192,31 @@ function getStatusEmote(status: StatusEmotes, guild: Guild): GuildEmoji {
 			return guild.emojis.cache.find((emoji) => emoji.name === 'check')!;
 		case StatusEmotes.FAILURE:
 			return guild.emojis.cache.find((emoji) => emoji.name === 'error')!;
+	}
+}
+
+class CacheCollection extends Collection<string, any> {
+	public setSources(value: string[]) {
+		this.set('sources', value);
+	}
+
+	public getSources(): string[] | undefined {
+		return this.get('sources') as string[] | undefined;
+	}
+
+	public setMedia(value: ScrapeMedia) {
+		this.set('media', value);
+	}
+
+	public getMedia(): ScrapeMedia | undefined {
+		return this.get('media') as ScrapeMedia | undefined;
+	}
+
+	public setPosterPath(value: string) {
+		this.set('posterPath', value);
+	}
+
+	public getPosterPath(): string | undefined {
+		return this.get('posterPath') as string | undefined;
 	}
 }
