@@ -17,7 +17,7 @@ export class AvailableCommand extends Command {
 			const { type, result } = media;
 			const scrapeMedia = transformSearchResultToScrapeMedia(type, result);
 
-			await checkAvailability(scrapeMedia, result.backdrop_path, interaction);
+			await checkAvailability(scrapeMedia, result.poster_path ?? '', interaction);
 		} catch (ex) {
 			interaction.client.logger.error(ex);
 
