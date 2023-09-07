@@ -13,12 +13,12 @@ import {
 } from 'discord.js';
 import { MovieDetails, TMDB, TvShowDetails } from 'tmdb-ts';
 
-import { Status, TagStore, config, statusEmojiIds, tagCache } from '#src/config';
+import { DEFAULT_REFRESH_URL, Status, TagStore, config, statusEmojiIds, tagCache } from '#src/config';
 
 const tmdb = new TMDB(config.tmdbApiKey);
 
 export async function updateCacheFromRemote() {
-  const res = await fetch(config.tagRefreshUrl)
+  const res = await fetch(config.tagRefreshUrl ?? DEFAULT_REFRESH_URL)
     .then((x) => x.text())
     .catch(() => null);
 
