@@ -139,9 +139,6 @@ export async function checkAvailability(media: ScrapeMedia, posterPath: string, 
 		cache.setStatus(status);
 	}
 
-	const videos = status?.filter((s) => s.status === Status.SUCCESS).length;
-	if (videos) cache.setVideos(videos);
-
 	await makeResponseEmbed(cache, interaction, Boolean(results));
 }
 
@@ -210,7 +207,7 @@ async function makeResponseEmbed(cache: CacheCollection, interaction: CommandInt
 		...(success !== undefined
 			? {
 					footer: {
-						text: `${success ? '✅' : '❌'} | found ${cache.getVideos() ?? 0} video${cache.getVideos() === 1 ? '' : 's'}`
+						text: `${success ? '✅ | found media' : '❌ | no media found'}`
 					}
 			  }
 			: {})
@@ -264,14 +261,6 @@ class CacheCollection extends Collection<string, any> {
 
 	public setStatus(value: ProviderStatus[]) {
 		this.set('status', value);
-	}
-
-	public setVideos(value: number) {
-		this.set('videos', value);
-	}
-
-	public getVideos(): number | undefined {
-		return this.get('videos') as number | undefined;
 	}
 
 	public setMedia(value: ScrapeMedia) {
