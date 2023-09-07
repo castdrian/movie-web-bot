@@ -1,7 +1,7 @@
 import { Command } from '@sapphire/framework';
 import { CommandInteraction } from 'discord.js';
 
-export class AvailableCommand extends Command {
+export class RefreshCommand extends Command {
 	public override async chatInputRun(interaction: CommandInteraction) {
 		await interaction.deferReply({ ephemeral: true });
 		await interaction.editReply('not implemented yet');
