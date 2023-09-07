@@ -160,9 +160,7 @@ async function makeResponseEmbed(cache: CacheCollection, interaction: CommandInt
 		...(success !== undefined
 			? {
 					footer: {
-						text: `${success ? '✅' : '❌'} | found ${cache.get('videos')?.length ?? 0} video${
-							cache.get('videos')?.length === 1 ? '' : 's'
-						}`
+						text: `${success ? '✅' : '❌'} | found ${cache.getVideos() ?? 0} video${cache.getVideos() === 1 ? '' : 's'}`
 					}
 			  }
 			: {})
@@ -202,6 +200,14 @@ class CacheCollection extends Collection<string, any> {
 
 	public getSources(): string[] | undefined {
 		return this.get('sources') as string[] | undefined;
+	}
+
+	public setVideos(value: number) {
+		this.set('videos', value);
+	}
+
+	public getVideos(): number | undefined {
+		return this.get('videos') as number | undefined;
 	}
 
 	public setMedia(value: ScrapeMedia) {
