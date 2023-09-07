@@ -63,7 +63,7 @@ export async function checkAvailability(media: ScrapeMedia, posterPath: string, 
 			init(e) {
 				console.log('init', e);
 				cache.set('sources', e.sourceIds);
-				void makeResponseEmbed(e.sourceIds, {}, interaction, media, posterPath);
+				void makeResponseEmbed(e.sourceIds, {}, interaction, media, posterPath, cache);
 			},
 			start(e) {
 				console.log('start', e);
@@ -92,6 +92,8 @@ export async function checkAvailability(media: ScrapeMedia, posterPath: string, 
 		];
 		await interaction.editReply({ components });
 	}
+
+	await makeResponseEmbed(cache.get('sources') ?? [], {}, interaction, media, posterPath, cache, Boolean(results));
 }
 
 export function transformSearchResultToScrapeMedia(type: 'tv' | 'movie', result: TvShowDetails | MovieDetails): ScrapeMedia {
@@ -130,10 +132,16 @@ async function makeResponseEmbed(
 	results: Record<string, string>,
 	interaction: CommandInteraction,
 	media: ScrapeMedia,
-	posterPath: string
+	posterPath: string,
+	cache: Collection<string, string[]>,
+	success?: boolean
 ): Promise<void> {
 	console.log(sources, results);
-	const success = true;
+
+	if (!sources.length) {
+		return void interaction.editReply('An error occurred while collecting providers.');
+	}
+
 	const embed = {
 		title: `${media.title} (${media.releaseYear})`,
 		description: `\`FlixHQ\` <:xmark:1149017090670465054>\n\`SuperStream\` <a:aLoading:1149016985699627018>\n\`GoMovies\` <:slash:1149017166478327900>`,
@@ -147,10 +155,18 @@ async function makeResponseEmbed(
 		},
 		url: `https://movie-web.app/media/tmdb-${media.type}-${media.tmdbId}`,
 		timestamp: new Date().toISOString(),
-		footer: {
-			text: `${success ? '✅' : '❌'} | found ${sources.length} video${sources.length === 1 ? '' : 's'}`
-		}
+		// eslint-disable-next-line no-negated-condition
+		...(success !== undefined
+			? {
+					footer: {
+						text: `${results ? '✅' : '❌'} | found ${cache.get('videos')?.length ?? 0} video${
+							cache.get('videos')?.length === 1 ? '' : 's'
+						}`
+					}
+			  }
+			: {})
 	} satisfies APIEmbed;
+
 	await interaction.editReply({ embeds: [embed] });
 }
 
