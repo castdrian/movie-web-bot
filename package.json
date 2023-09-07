@@ -9,15 +9,14 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "lint": "eslint src --ext ts --fix",
-    "format": "prettier --write src/**/*.ts",
+    "lint": "eslint --ext .ts src",
+    "lint:fix": "eslint --fix --ext .ts src",
+    "lint:report": "eslint --ext .ts --output-file eslint_report.json --format json src",
     "update": "yarn upgrade-interactive",
     "build": "tsc -b src",
     "clean": "tsc -b src --clean",
     "watch": "tsc -b src -w",
-    "start": "yarn run build && node dist/main.js",
-    "predocker:start": "yarn",
-    "docker:start": "yarn start"
+    "start": "yarn run build && node dist/main.js"
   },
   "dependencies": {
     "@ltd/j-toml": "^1.38.0",
