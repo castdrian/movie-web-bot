@@ -1,10 +1,6 @@
 import { Command } from '@sapphire/framework';
-import { CommandInteraction } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, CommandInteraction } from 'discord.js';
 
-import { Command, version as sversion } from '@sapphire/framework';
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, CommandInteraction, time, version } from 'discord.js';
-import lcl from 'last-commit-log';
-import ts from 'typescript';
 import pkg from '#package.json' assert { type: 'json' };
 
 export class InfoCommand extends Command {
