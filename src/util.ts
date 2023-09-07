@@ -65,7 +65,7 @@ export async function checkAvailability(media: ScrapeMedia, posterPath: string, 
 		events: {
 			init(e) {
 				console.log('init', e);
-				cache.set('sources', e.sourceIds);
+				cache.setSources(e.sourceIds);
 				void makeResponseEmbed(cache, interaction);
 			},
 			start(e) {
