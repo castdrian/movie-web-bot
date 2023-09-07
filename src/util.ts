@@ -157,7 +157,12 @@ export async function checkAvailability(media: ScrapeMedia, posterPath: string, 
 	await makeResponseEmbed(cache, interaction, Boolean(results));
 }
 
-export function transformSearchResultToScrapeMedia(type: 'tv' | 'movie', result: TvShowDetails | MovieDetails): ScrapeMedia {
+export function transformSearchResultToScrapeMedia(
+	type: 'tv' | 'movie',
+	result: TvShowDetails | MovieDetails,
+	season?: number,
+	episode?: number
+): ScrapeMedia {
 	if (type === 'tv') {
 		const tvResult = result as TvShowDetails;
 		return {
@@ -165,13 +170,13 @@ export function transformSearchResultToScrapeMedia(type: 'tv' | 'movie', result:
 			tmdbId: tvResult.id.toString(),
 			title: tvResult.name,
 			releaseYear: new Date(tvResult.first_air_date).getFullYear(),
-			episode: {
-				number: 1,
-				tmdbId: ''
-			},
 			season: {
-				number: tvResult.seasons[0].season_number,
-				tmdbId: tvResult.seasons[0].id.toString()
+				number: season ?? tvResult.seasons[0].season_number,
+				tmdbId: season ? tvResult.seasons.find((s) => s.season_number === season)?.id.toString() ?? '' : tvResult.seasons[0].id.toString()
+			},
+			episode: {
+				number: episode ?? 1,
+				tmdbId: ''
 			}
 		};
 	}

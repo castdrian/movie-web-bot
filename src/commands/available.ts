@@ -16,7 +16,15 @@ export class AvailableCommand extends Command {
 			await interaction.deferReply();
 
 			const { type, result } = media;
-			const scrapeMedia = transformSearchResultToScrapeMedia(type, result);
+			let season: number | undefined;
+			let episode: number | undefined;
+
+			if (type === 'tv') {
+				season = interaction.options.getInteger('season') ?? undefined;
+				episode = interaction.options.getInteger('episode') ?? undefined;
+			}
+
+			const scrapeMedia = transformSearchResultToScrapeMedia(type, result, season, episode);
 
 			await checkAvailability(scrapeMedia, result.poster_path ?? '', interaction);
 		} catch (ex) {
@@ -51,6 +59,16 @@ export class AvailableCommand extends Command {
 						.setDescription('the title to check')
 						.setRequired(true)
 						.setAutocomplete(true)
+				)
+				.addIntegerOption((option) =>
+					option //
+						.setName('season')
+						.setDescription('the season to check')
+				)
+				.addIntegerOption((option) =>
+					option //
+						.setName('episode')
+						.setDescription('the episode to check')
 				)
 		);
 	}
