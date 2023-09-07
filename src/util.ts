@@ -2,7 +2,10 @@ import TOML from '@ltd/j-toml';
 import { RunnerOptions, ScrapeMedia, makeProviders, makeStandardFetcher } from '@movie-web/providers';
 import {
   APIEmbed,
+  ActionRowBuilder,
   ApplicationCommandOptionChoiceData,
+  ButtonBuilder,
+  ButtonStyle,
   Client,
   Collection,
   CommandInteraction,
@@ -144,20 +147,14 @@ export async function checkAvailability(
   const status = cache.getStatus();
 
   if (results) {
-    const components = [
-      {
-        type: 1,
-        components: [
-          {
-            type: 2,
-            label: 'watch on movie-web',
-            style: 5,
-            url: `https://movie-web.app/media/tmdb-${media.type}-${media.tmdbId}`,
-          },
-        ],
-      },
-    ];
-    await interaction.editReply({ components });
+    const actionRow = new ActionRowBuilder<ButtonBuilder>().setComponents(
+      new ButtonBuilder()
+        .setLabel('Watch on movie-web')
+        .setStyle(ButtonStyle.Link)
+        .setURL(`https://movie-web.app/media/tmdb-${media.type}-${media.tmdbId}`),
+    );
+
+    await interaction.editReply({ components: [actionRow] });
   }
 
   if (status) {

@@ -1,9 +1,13 @@
 import { Command } from '@sapphire/framework';
 import {
+  ActionRowBuilder,
   ApplicationCommandType,
+  ButtonBuilder,
+  ButtonStyle,
   Message,
   MessageComponentInteraction,
   MessageContextMenuCommandInteraction,
+  StringSelectMenuBuilder,
 } from 'discord.js';
 
 import { tagCache } from '#src/config';
@@ -14,39 +18,21 @@ export class TagsCommand extends Command {
     const { author } = interaction.targetMessage;
     const options = [...tagCache.keys()].map((key) => ({ label: key, value: key }));
 
-    const components = [
-      {
-        type: 1,
-        components: [
-          {
-            type: 3,
-            custom_id: 'tag_select',
-            options,
-            placeholder: 'Select a tag',
-            min_values: 1,
-            max_values: 1,
-          },
-        ],
-      },
-      {
-        type: 1,
-        components: [
-          {
-            type: 2,
-            custom_id: 'tag_confirm',
-            style: 4,
-            label: 'Confirm',
-          },
-          {
-            type: 2,
-            custom_id: 'tag_cancel',
-            style: 3,
-            label: 'Cancel',
-          },
-        ],
-      },
-    ];
-    await interaction.reply({ components, ephemeral: true });
+    const selectMenuRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+      new StringSelectMenuBuilder()
+        .setCustomId('tag_select')
+        .setOptions(options)
+        .setPlaceholder('Select a tag')
+        .setMinValues(1)
+        .setMaxValues(1),
+    );
+
+    const buttonRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder().setCustomId('tag_confirm').setStyle(ButtonStyle.Primary).setLabel('Confirm'),
+      new ButtonBuilder().setCustomId('tag_cancel').setStyle(ButtonStyle.Secondary).setLabel('Cancel'),
+    );
+
+    await interaction.reply({ components: [selectMenuRow, buttonRow], ephemeral: true });
 
     const filter = (i: MessageComponentInteraction) => i.user.id === interaction.user.id;
     const collector = interaction.channel?.createMessageComponentCollector({ filter, time: 15000 });

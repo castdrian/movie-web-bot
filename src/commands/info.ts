@@ -1,7 +1,7 @@
 import { cpus, totalmem } from 'os';
 
 import { Command, version as sversion } from '@sapphire/framework';
-import { CommandInteraction, time, version } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, CommandInteraction, time, version } from 'discord.js';
 import lcl from 'last-commit-log';
 import ts from 'typescript';
 
@@ -43,39 +43,16 @@ export class InfoCommand extends Command {
       color: 0xa87fd1,
     };
 
-    const components = [
-      {
-        type: 1,
-        components: [
-          {
-            type: 2,
-            label: 'Contact',
-            style: 5,
-            url: 'discord://-/users/135081860790222848',
-          },
-          {
-            type: 2,
-            label: 'Discord',
-            style: 5,
-            url: 'https://discord.movie-web.app/',
-          },
-          {
-            type: 2,
-            label: 'GitHub',
-            style: 5,
-            url: 'https://github.com/movie-web/movie-web',
-          },
-          {
-            type: 2,
-            label: 'movie-web.app',
-            style: 5,
-            url: 'https://movie-web.app',
-          },
-        ],
-      },
-    ];
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder().setLabel('Discord').setStyle(ButtonStyle.Link).setURL('https://discord.movie-web.app/'),
+      new ButtonBuilder()
+        .setLabel('GitHub')
+        .setStyle(ButtonStyle.Link)
+        .setURL('https://github.com/movie-web/movie-web'),
+      new ButtonBuilder().setLabel('movie-web.app').setStyle(ButtonStyle.Link).setURL('https://movie-web.app'),
+    );
 
-    await interaction.editReply({ embeds: [embed], components });
+    await interaction.editReply({ embeds: [embed], components: [row] });
   }
 
   public override registerApplicationCommands(registry: Command.Registry) {
