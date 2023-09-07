@@ -1,6 +1,6 @@
-import { APIEmbed, ApplicationCommandOptionChoiceData, Collection, CommandInteraction, Guild, GuildEmoji } from 'discord.js';
+import { APIEmbed, ApplicationCommandOptionChoiceData, Client, Collection, CommandInteraction, GuildEmoji } from 'discord.js';
 import { MovieDetails, TMDB, TvShowDetails } from 'tmdb-ts';
-import { config } from '#src/config';
+import { Status, config, statusEmojiIds } from '#src/config';
 import { RunnerOptions, ScrapeMedia, makeProviders, makeStandardFetcher } from '@movie-web/providers';
 
 const tmdb = new TMDB(config.tmdbApiKey);
@@ -186,7 +186,7 @@ async function makeResponseEmbed(cache: CacheCollection, interaction: CommandInt
 		.map((source) => {
 			const sourceStatus = status.find((s) => s.id === source);
 			if (!sourceStatus) return undefined;
-			return `\`${source}\` ${getStatusEmote(sourceStatus.status, interaction.guild!)}`;
+			return `\`${source}\` ${getStatusEmote(sourceStatus.status, interaction.client)}`;
 		})
 		.filter((s) => s)
 		.join('\n');
@@ -220,30 +220,14 @@ function getMediaPoster(posterPath: string): string {
 	return `https://image.tmdb.org/t/p/w185/${posterPath}`;
 }
 
-enum Status {
-	WAITING,
-	LOADING,
-	SUCCESS,
-	FAILURE
-}
-
 interface ProviderStatus {
 	id: string;
 	status: Status;
 	current: boolean;
 }
 
-function getStatusEmote(status: Status, guild: Guild): GuildEmoji {
-	switch (status) {
-		case Status.WAITING:
-			return guild.emojis.cache.find((emoji) => emoji.name === 'slash')!;
-		case Status.LOADING:
-			return guild.emojis.cache.find((emoji) => emoji.name === 'loading')!;
-		case Status.SUCCESS:
-			return guild.emojis.cache.find((emoji) => emoji.name === 'check')!;
-		case Status.FAILURE:
-			return guild.emojis.cache.find((emoji) => emoji.name === 'error')!;
-	}
+function getStatusEmote(status: Status, client: Client): GuildEmoji {
+	return client.emojis.cache.find((emoji) => emoji.id === statusEmojiIds[status].find((id) => emoji.id === id))!;
 }
 
 class CacheCollection extends Collection<string, any> {
