@@ -203,7 +203,6 @@ async function makeResponseEmbed(cache: CacheCollection, interaction: CommandInt
 			if (!sourceStatus) return undefined;
 			return `\`${source}\` ${getStatusEmote(sourceStatus.status, interaction.client)}`;
 		})
-		.filter((s) => s)
 		.join('\n');
 
 	const embed = {
