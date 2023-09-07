@@ -209,6 +209,7 @@ async function makeResponseEmbed(cache: CacheCollection, interaction: CommandInt
 	const embed = {
 		title: `${media.title} (${media.releaseYear})`,
 		description,
+		color: 0xa87fd1,
 		thumbnail: {
 			url: getMediaPoster(cache.getPosterPath()!)
 		},
