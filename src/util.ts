@@ -1,4 +1,4 @@
-import { APIEmbed, ApplicationCommandOptionChoiceData, Collection, CommandInteraction } from 'discord.js';
+import { APIEmbed, ApplicationCommandOptionChoiceData, Collection, CommandInteraction, Guild, GuildEmoji } from 'discord.js';
 import { MovieDetails, TMDB, TvShowDetails } from 'tmdb-ts';
 import { config } from '#src/config';
 import { RunnerOptions, ScrapeMedia, makeProviders, makeStandardFetcher } from '@movie-web/providers';
@@ -144,7 +144,10 @@ async function makeResponseEmbed(
 
 	const embed = {
 		title: `${media.title} (${media.releaseYear})`,
-		description: `\`FlixHQ\` <:xmark:1149017090670465054>\n\`SuperStream\` <a:aLoading:1149016985699627018>\n\`GoMovies\` <:slash:1149017166478327900>`,
+		description: `\`FlixHQ\` ${getStatusEmote(StatusEmotes.FAILURE, interaction.guild!)}\n\`SuperStream\` ${getStatusEmote(
+			StatusEmotes.LOADING,
+			interaction.guild!
+		)}\n\`GoMovies\` ${getStatusEmote(StatusEmotes.WAITING, interaction.guild!)}`,
 		color: 0xa87fd1,
 		thumbnail: {
 			url: getMediaPoster(posterPath)
@@ -172,4 +175,24 @@ async function makeResponseEmbed(
 
 function getMediaPoster(posterPath: string): string {
 	return `https://image.tmdb.org/t/p/w185/${posterPath}`;
+}
+
+enum StatusEmotes {
+	WAITING,
+	LOADING,
+	SUCCESS,
+	FAILURE
+}
+
+function getStatusEmote(status: StatusEmotes, guild: Guild): GuildEmoji {
+	switch (status) {
+		case StatusEmotes.WAITING:
+			return guild.emojis.cache.find((emoji) => emoji.name === 'slash')!;
+		case StatusEmotes.LOADING:
+			return guild.emojis.cache.find((emoji) => emoji.name === 'loading')!;
+		case StatusEmotes.SUCCESS:
+			return guild.emojis.cache.find((emoji) => emoji.name === 'check')!;
+		case StatusEmotes.FAILURE:
+			return guild.emojis.cache.find((emoji) => emoji.name === 'error')!;
+	}
 }

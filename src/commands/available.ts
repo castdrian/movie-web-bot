@@ -6,6 +6,8 @@ export class AvailableCommand extends Command {
 	public override async chatInputRun(interaction: CommandInteraction) {
 		try {
 			if (!interaction.isChatInputCommand()) return;
+			if (!interaction.inCachedGuild()) return;
+
 			const identifier = interaction.options.getString('title', true);
 
 			const media = await fetchMedia(identifier);
