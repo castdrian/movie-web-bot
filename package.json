@@ -25,7 +25,6 @@
     "@sapphire/framework": "^4.5.1",
     "@sapphire/plugin-logger": "^3.0.3",
     "discord.js": "^14.13.0",
-    "last-commit-log": "^3.3.0",
     "neat-config": "^2.0.0",
     "tmdb-ts": "^1.4.0",
     "tslib": "^2.6.1",
@@ -53,6 +52,7 @@
     "*.{mjs,js,ts}": "eslint --fix --ext mjs,js,ts"
   },
   "imports": {
-    "#src/*": "./dist/*.js"
+    "#src/*": "./dist/*.js",
+	"#package.json": "./package.json"
   }
 }

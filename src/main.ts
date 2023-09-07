@@ -14,6 +14,4 @@ const client = new SapphireClient({
   },
 });
 
-if (!config.discordToken) process.exit(0);
-
 await client.login(config.discordToken);

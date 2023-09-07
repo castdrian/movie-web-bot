@@ -16,6 +16,7 @@
   "plugins": ["@typescript-eslint", "import", "prettier"],
   "rules": {
     "no-underscore-dangle": "off",
+	"no-negated-condition": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "import/no-extraneous-dependencies": ["error", { "devDependencies": true }],
     "no-console": "off",

@@ -3,6 +3,7 @@
   "compilerOptions": {
     "rootDir": "./",
     "outDir": "../dist",
+	"module": "NodeNext",
     "target": "ESNext",
     "composite": true,
     "preserveConstEnums": true,

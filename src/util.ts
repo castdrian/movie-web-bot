@@ -235,11 +235,10 @@ async function makeResponseEmbed(
     },
     author: {
       name: `movie-web`,
-      icon_url: `https://github.com/movie-web/movie-web/blob/dev/public/android-chrome-512x512.png?raw=true`,
+      icon_url: `https://movie-web.app/android-chrome-512x512.png`,
     },
     url: `https://movie-web.app/media/tmdb-${media.type}-${media.tmdbId}`,
     timestamp: new Date().toISOString(),
-    // eslint-disable-next-line no-negated-condition
     ...(success !== undefined
       ? {
           footer: {

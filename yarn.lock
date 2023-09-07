@@ -935,13 +935,6 @@ domutils@^3.0.1:
     domelementtype "^2.3.0"
     domhandler "^5.0.3"
 
-dotgitconfig@^1.1.0:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/dotgitconfig/-/dotgitconfig-1.1.2.tgz#4746137de145d521a5d84dde5f960833b24e0a71"
-  integrity sha512-M+nUsYHJT2qs6bnYqotmO+1IQ09w3ZwLcX4MmbblaWN9C7ydDWM2xQLv22xfl4bUxienESi1GsZnZJPb8jslqQ==
-  dependencies:
-    ini "^1.3.5"
-
 eastasianwidth@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/eastasianwidth/-/eastasianwidth-0.2.0.tgz#696ce2ec0aa0e6ea93a397ffcf24aa7840c827cb"
@@ -1607,11 +1600,6 @@ inherits@2:
   resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.4.tgz#0fa2c64f932917c3433a0ded55363aae37416b7c"
   integrity sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==
 
-ini@^1.3.5:
-  version "1.3.8"
-  resolved "https://registry.yarnpkg.com/ini/-/ini-1.3.8.tgz#a29da425b48806f34767a4efce397269af28432c"
-  integrity sha512-JV/yugV2uzW5iMRSiZAyDtQd+nxtUnjeLt0acNdw98kKLrvuRVyB80tsREOE7yvGVgalhZ6RNXCmEHkUKBKxew==
-
 internal-slot@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/internal-slot/-/internal-slot-1.0.5.tgz#f2a2ee21f668f8627a4667f309dc0f4fb6674986"
@@ -1836,13 +1824,6 @@ keyv@^4.5.3:
   integrity sha512-QCiSav9WaX1PgETJ+SpNnx2PRRapJ/oRSXM4VO5OGYGSjrxbKPVFVhB3l2OCbLCk329N8qyAtsJjSjvVBWzEug==
   dependencies:
     json-buffer "3.0.1"
-
-last-commit-log@^3.3.0:
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/last-commit-log/-/last-commit-log-3.3.0.tgz#89cb4aa8825257f50390003ded017523eddb269f"
-  integrity sha512-qYzhTltQvQ/mMIDWnG16KyUi79y4F5uEqHDDbAJm2HLuWgDuBhZ8g5PyWomYV0wsDQDuYcPWMQdJ91wsZOZ5NQ==
-  dependencies:
-    dotgitconfig "^1.1.0"
 
 levn@^0.4.1:
   version "0.4.1"
