@@ -1,6 +1,6 @@
+import { ApplicationCommandRegistries, LogLevel, SapphireClient } from '@sapphire/framework';
 import { GatewayIntentBits } from 'discord.js';
-import { LogLevel, SapphireClient } from '@sapphire/framework';
-import { ApplicationCommandRegistries } from '@sapphire/framework';
+
 import { config } from '#src/config';
 import '@sapphire/plugin-logger/register';
 

@@ -1,7 +1,8 @@
-import { tagCache } from '#src/config';
-import { updateCacheFromRemote } from '#src/util';
 import { Command } from '@sapphire/framework';
 import { CommandInteraction } from 'discord.js';
+
+import { tagCache } from '#src/config';
+import { updateCacheFromRemote } from '#src/util';
 
 export class RefreshCommand extends Command {
 	public override async chatInputRun(interaction: CommandInteraction) {

@@ -1,6 +1,7 @@
-import { checkAvailability, fetchMedia, searchTitle, transformSearchResultToScrapeMedia } from '#src/util';
 import { Command } from '@sapphire/framework';
 import { AutocompleteInteraction, CommandInteraction } from 'discord.js';
+
+import { checkAvailability, fetchMedia, searchTitle, transformSearchResultToScrapeMedia } from '#src/util';
 
 export class AvailableCommand extends Command {
 	public override async chatInputRun(interaction: CommandInteraction) {

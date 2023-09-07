@@ -1,8 +1,9 @@
-import { createConfigLoader } from 'neat-config';
-import TOML from '@ltd/j-toml';
-import { z } from 'zod';
-import { Collection } from 'discord.js';
 import { readFileSync } from 'node:fs';
+
+import TOML from '@ltd/j-toml';
+import { Collection } from 'discord.js';
+import { createConfigLoader } from 'neat-config';
+import { z } from 'zod';
 
 const schema = z.object({
 	discordToken: z.string(),

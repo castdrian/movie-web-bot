@@ -1,14 +1,15 @@
+import TOML from '@ltd/j-toml';
+import { RunnerOptions, ScrapeMedia, makeProviders, makeStandardFetcher } from '@movie-web/providers';
 import { APIEmbed, ApplicationCommandOptionChoiceData, Client, Collection, CommandInteraction, GuildEmoji } from 'discord.js';
 import { MovieDetails, TMDB, TvShowDetails } from 'tmdb-ts';
+
 import { Status, TagStore, config, statusEmojiIds, tagCache } from '#src/config';
-import { RunnerOptions, ScrapeMedia, makeProviders, makeStandardFetcher } from '@movie-web/providers';
-import TOML from '@ltd/j-toml';
 
 const tmdb = new TMDB(config.tmdbApiKey);
 
 export async function updateCacheFromRemote() {
 	const res = await fetch(config.tagRefreshUrl)
-		.then((res) => res.text())
+		.then((x) => x.text())
 		.catch(() => null);
 
 	if (!res) return;

@@ -1,6 +1,7 @@
-import { tagCache } from '#src/config';
 import { Command } from '@sapphire/framework';
 import { ApplicationCommandType, Message, MessageComponentInteraction, MessageContextMenuCommandInteraction } from 'discord.js';
+
+import { tagCache } from '#src/config';
 
 export class TagsCommand extends Command {
 	public override async contextMenuRun(interaction: MessageContextMenuCommandInteraction) {
