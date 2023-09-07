@@ -96,7 +96,7 @@ export async function checkAvailability(
     events: {
       init(e) {
         cache.setSources(e.sourceIds);
-        cache.setStatus(e.sourceIds.map((id) => ({ id, status: Status.WAITING, current: false })));
+        cache.setStatus(e.sourceIds.map((id) => ({ id, status: Status.WAITING })));
         void makeResponseEmbed(cache, interaction);
       },
       start(e) {
@@ -106,36 +106,23 @@ export async function checkAvailability(
         if (!sourceStatus) return;
         sourceStatus.status = Status.LOADING;
 
-        status.forEach((s) => {
-          if (s.id === e) return;
-          s.current = false;
-        });
-        sourceStatus.current = true;
-
         cache.setStatus(status);
         void makeResponseEmbed(cache, interaction);
       },
       update(e) {
         const status = cache.getStatus();
         if (!status) return;
-        // const sourceStatus = status.find((s) => s.id === e.id);
-        const sourceStatus = status.find((s) => s.current);
+        const sourceStatus = status.find((s) => s.id === e.id);
         if (!sourceStatus) return;
 
-        switch (e.status) {
-          case 'success':
-            sourceStatus.status = Status.SUCCESS;
-            break;
-          case 'failure':
-            sourceStatus.status = Status.FAILURE;
-            break;
-          case 'notfound':
-            sourceStatus.status = Status.FAILURE;
-            break;
-          case 'pending':
-            sourceStatus.status = Status.LOADING;
-            break;
-        }
+        const statusMap = {
+          success: Status.SUCCESS,
+          failure: Status.FAILURE,
+          notfound: Status.FAILURE,
+          pending: Status.LOADING,
+        };
+
+        sourceStatus.status = statusMap[e.status];
 
         cache.setStatus(status);
         void makeResponseEmbed(cache, interaction);
@@ -258,7 +245,6 @@ function getMediaPoster(posterPath: string): string {
 interface ProviderStatus {
   id: string;
   status: Status;
-  current: boolean;
 }
 
 function getStatusEmote(status: Status, client: Client): GuildEmoji {

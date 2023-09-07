@@ -135,10 +135,10 @@
   resolved "https://registry.yarnpkg.com/@ltd/j-toml/-/j-toml-1.38.0.tgz#00d19f6d65ac5dac39bc64f97a545f47e9ebefc4"
   integrity sha512-lYtBcmvHustHQtg4X7TXUu1Xa/tbLC3p2wLvgQI+fWVySguVZJF60Snxijw5EiohumxZbR10kWYFFebh1zotiw==
 
-"@movie-web/providers@^0.0.8":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@movie-web/providers/-/providers-0.0.8.tgz#2222c6588d0d0ce5da0552826f00bd83feac7030"
-  integrity sha512-K8tGC8BUOPhjR+lYNg5191K5Xl29bs/gNN4uN2Wtztl6wNe3q8lAIa6wKAunxm9lK7S8tylTkSFkK3ZcU7o2Hg==
+"@movie-web/providers@^0.0.9":
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/@movie-web/providers/-/providers-0.0.9.tgz#55924df5939d741335086e8157901744ac6e90fe"
+  integrity sha512-OoYRE3S8mTXyt41JYnFIwCcO7mrvjCF47h788EAYSRBU0osV6WFydaMndbS2/+oD/xeRc52ePNKtvqoWWXD2lw==
   dependencies:
     cheerio "^1.0.0-rc.12"
     crypto-js "^4.1.1"
