@@ -2,8 +2,10 @@ import { Command } from '@sapphire/framework';
 import {
   ActionRowBuilder,
   ApplicationCommandType,
+  AutocompleteInteraction,
   ButtonBuilder,
   ButtonStyle,
+  CommandInteraction,
   Message,
   MessageComponentInteraction,
   MessageContextMenuCommandInteraction,
@@ -67,11 +69,51 @@ export class TagsCommand extends Command {
     });
   }
 
+  public override async chatInputRun(interaction: CommandInteraction) {
+    if (!interaction.isChatInputCommand()) return;
+
+    const tagKey = interaction.options.getString('key', true);
+    const user = interaction.options.getUser('mention');
+    const tag = tagCache.get(tagKey);
+
+    if (!tag) return interaction.reply({ content: 'Tag not found', ephemeral: true });
+    return interaction.reply({ content: `${user ? `${user}\n` : ''}${tag}` });
+  }
+
+  public override async autocompleteRun(interaction: AutocompleteInteraction) {
+    if (interaction.commandName !== 'tag') return;
+    const { name, value } = interaction.options.getFocused(true);
+    if (name !== 'key') return;
+
+    const response = [...tagCache.keys()]
+      .filter((key) => key.includes(value))
+      .map((key) => ({ name: key, value: key }));
+
+    await interaction.respond(response);
+  }
+
   public override registerApplicationCommands(registry: Command.Registry) {
     registry.registerContextMenuCommand((builder) =>
       builder //
         .setName('Send Tag')
         .setType(ApplicationCommandType.Message),
+    );
+    registry.registerChatInputCommand((builder) =>
+      builder //
+        .setName('tag')
+        .setDescription('send a tag')
+        .addStringOption((option) =>
+          option //
+            .setName('key')
+            .setDescription('the tag to send')
+            .setRequired(true)
+            .setAutocomplete(true),
+        )
+        .addUserOption((option) =>
+          option //
+            .setName('mention')
+            .setDescription('the user to mention'),
+        ),
     );
   }
 }
