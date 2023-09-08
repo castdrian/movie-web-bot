@@ -25,6 +25,8 @@
     "@sapphire/framework": "^4.5.1",
     "@sapphire/plugin-logger": "^3.0.3",
     "discord.js": "^14.13.0",
+    "fastify": "^4.22.2",
+    "fastify-metrics": "^10.3.0",
     "neat-config": "^2.0.0",
     "tmdb-ts": "^1.4.0",
     "tslib": "^2.6.1",
