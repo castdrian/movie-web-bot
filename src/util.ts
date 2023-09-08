@@ -24,12 +24,12 @@ import {
 import { Counter } from 'prom-client';
 import { MovieDetails, TMDB, TvShowDetails } from 'tmdb-ts';
 
-import { DEFAULT_REFRESH_URL, Status, TagStore, config, statusEmojiIds, tagCache } from '#src/config';
+import { Status, TagStore, config, statusEmojiIds, tagCache } from '#src/config';
 
 const tmdb = new TMDB(config.tmdbApiKey);
 
 export async function updateCacheFromRemote() {
-  const res = await fetch(config.tagRefreshUrl ?? DEFAULT_REFRESH_URL)
+  const res = await fetch(config.tagRefreshUrl)
     .then((x) => x.text())
     .catch(() => null);
 
@@ -233,7 +233,7 @@ async function makeResponseEmbed(
     },
     author: {
       name: `movie-web`,
-      icon_url: interaction.client.user?.displayAvatarURL() ?? 'https://movie-web.app/android-chrome-512x512.png',
+      icon_url: interaction.client.user?.displayAvatarURL() ?? config.mwIconUrl,
     },
     url: `https://movie-web.app/media/tmdb-${media.type}-${media.tmdbId}`,
     timestamp: new Date().toISOString(),

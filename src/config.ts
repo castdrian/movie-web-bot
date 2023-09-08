@@ -9,12 +9,11 @@ const schema = z.object({
   discordToken: z.string(),
   guildId: z.string(),
   tmdbApiKey: z.string(),
-  tagRefreshUrl: z.string().optional(),
+  tagRefreshUrl: z.string().default('https://raw.githubusercontent.com/movie-web/discord-bot/master/src/tags.toml'),
+  mwIconUrl: z.string().default('https://movie-web.app/android-chrome-512x512.png'),
 });
 
 const prefix = 'CONF_';
-
-export const DEFAULT_REFRESH_URL = 'https://raw.githubusercontent.com/movie-web/discord-bot/master/src/tags.toml';
 
 export enum Status {
   WAITING,

@@ -1,6 +1,7 @@
 import { Command } from '@sapphire/framework';
 import { CommandInteraction } from 'discord.js';
 
+import { config } from '#src/config';
 import { isRealError } from '#src/util';
 
 export class StatusCommand extends Command {
@@ -15,7 +16,7 @@ export class StatusCommand extends Command {
         title: 'mw status',
         description: `**Host:** ${host}\n**Status:** ${ok ? `🟢 UP` : '🔴 DOWN'}`,
         thumbnail: {
-          url: this.container.client.user?.displayAvatarURL() ?? 'https://movie-web.app/android-chrome-512x512.png',
+          url: this.container.client.user?.displayAvatarURL() ?? config.mwIconUrl,
         },
         color: 0xa87fd1,
       };
