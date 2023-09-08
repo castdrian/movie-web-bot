@@ -14,6 +14,7 @@ RUN yarn run build
 FROM base as production
 
 ENV NODE_ENV=production
+COPY --from=build /home/node/app/yarn.lock ./
 COPY --from=build /home/node/app/package.json ./
 COPY --from=build /home/node/app/dist ./dist
 RUN yarn install --frozen-lockfile --production
