@@ -11,7 +11,7 @@ export class InfoCommand extends Command {
       title: 'mw-bot info',
       description: `mw-bot v${pkg.version}`,
       thumbnail: {
-        url: this.container.client.user?.displayAvatarURL() ?? '',
+        url: this.container.client.user?.displayAvatarURL() ?? 'https://movie-web.app/android-chrome-512x512.png',
       },
       color: 0xa87fd1,
     };

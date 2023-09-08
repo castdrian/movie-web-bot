@@ -222,7 +222,7 @@ async function makeResponseEmbed(
     },
     author: {
       name: `movie-web`,
-      icon_url: `https://movie-web.app/android-chrome-512x512.png`,
+      icon_url: interaction.client.user?.displayAvatarURL() ?? 'https://movie-web.app/android-chrome-512x512.png',
     },
     url: `https://movie-web.app/media/tmdb-${media.type}-${media.tmdbId}`,
     timestamp: new Date().toISOString(),

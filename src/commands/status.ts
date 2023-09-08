@@ -12,7 +12,7 @@ export class StatusCommand extends Command {
       title: 'mw status',
       description: `**Host:** ${host}\n**Status:** ${ok ? `🟢 UP` : '🔴 DOWN'}`,
       thumbnail: {
-        url: this.container.client.user?.displayAvatarURL() ?? '',
+        url: this.container.client.user?.displayAvatarURL() ?? 'https://movie-web.app/android-chrome-512x512.png',
       },
       color: 0xa87fd1,
     };
