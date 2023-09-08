@@ -147,7 +147,7 @@ export async function checkAvailability(
   if (results) {
     const actionRow = new ActionRowBuilder<ButtonBuilder>().setComponents(
       new ButtonBuilder()
-        .setLabel('Watch on movie-web')
+        .setLabel('watch on movie-web')
         .setStyle(ButtonStyle.Link)
         .setURL(`https://movie-web.app/media/tmdb-${media.type}-${media.tmdbId}`),
     );
@@ -297,7 +297,7 @@ class CacheCollection extends Collection<string, any> {
 }
 
 export const commandRanCounter = new Counter({
-  name: 'command_ran_total',
+  name: 'commands_ran_total',
   help: 'Total number of commands ran',
 });
 
