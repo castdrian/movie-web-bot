@@ -1,8 +1,8 @@
 import { ApplicationCommandRegistries, LogLevel, SapphireClient } from '@sapphire/framework';
 import { GatewayIntentBits } from 'discord.js';
-import '@sapphire/plugin-logger/register';
 import fastify from 'fastify';
 import metricsPlugin from 'fastify-metrics';
+import '@sapphire/plugin-logger/register';
 
 import { config } from '#src/config';
 

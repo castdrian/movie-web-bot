@@ -1,6 +1,13 @@
 import TOML from '@ltd/j-toml';
 import { RunnerOptions, ScrapeMedia, makeProviders, makeStandardFetcher } from '@movie-web/providers';
 import {
+  IChatInputCommandPayload,
+  IContextMenuCommandPayload,
+  InteractionHandlerError,
+  InteractionHandlerParseError,
+  ListenerErrorPayload,
+} from '@sapphire/framework';
+import {
   APIEmbed,
   ActionRowBuilder,
   ApplicationCommandOptionChoiceData,
@@ -9,8 +16,12 @@ import {
   Client,
   Collection,
   CommandInteraction,
+  DiscordAPIError,
   GuildEmoji,
+  HTTPError,
+  RESTJSONErrorCodes,
 } from 'discord.js';
+import { Counter } from 'prom-client';
 import { MovieDetails, TMDB, TvShowDetails } from 'tmdb-ts';
 
 import { DEFAULT_REFRESH_URL, Status, TagStore, config, statusEmojiIds, tagCache } from '#src/config';
@@ -283,4 +294,44 @@ class CacheCollection extends Collection<string, any> {
   public getPosterPath(): string | undefined {
     return this.get('posterPath') as string | undefined;
   }
+}
+
+export const commandRanCounter = new Counter({
+  name: 'command_ran_total',
+  help: 'Total number of commands ran',
+});
+
+function isChatInputPayload(payload: any): payload is IChatInputCommandPayload {
+  return payload && 'interaction' in payload;
+}
+
+function isContextMenuPayload(payload: any): payload is IContextMenuCommandPayload {
+  return payload && 'interaction' in payload;
+}
+
+export function handleError(
+  error: Error,
+  payload:
+    | IChatInputCommandPayload
+    | IContextMenuCommandPayload
+    | ListenerErrorPayload
+    | InteractionHandlerError
+    | InteractionHandlerParseError,
+) {
+  const ignoredCodes = [
+    RESTJSONErrorCodes.UnknownInteraction,
+    RESTJSONErrorCodes.InteractionHasAlreadyBeenAcknowledged,
+  ];
+  if (error instanceof DiscordAPIError || error instanceof HTTPError) {
+    if (ignoredCodes.includes(error.status)) {
+      return;
+    }
+  }
+
+  if (!isChatInputPayload(payload) && !isContextMenuPayload(payload)) return;
+
+  if (payload.interaction.deferred || payload.interaction.replied) {
+    return payload.interaction.editReply({ content: error.message });
+  }
+  return payload.interaction.reply({ content: error.message });
 }

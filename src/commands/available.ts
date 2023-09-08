@@ -5,41 +5,34 @@ import { checkAvailability, fetchMedia, searchTitle, transformSearchResultToScra
 
 export class AvailableCommand extends Command {
   public override async chatInputRun(interaction: CommandInteraction) {
-    try {
-      if (!interaction.isChatInputCommand()) return;
-      if (!interaction.inCachedGuild()) return;
+    if (!interaction.isChatInputCommand()) return;
+    if (!interaction.inCachedGuild()) return;
+    if (interaction.commandName !== 'available') return;
+    if (interaction.replied || interaction.deferred) return;
 
-      const identifier = interaction.options.getString('title', true);
+    const identifier = interaction.options.getString('title', true);
 
-      const media = await fetchMedia(identifier);
-      if (!media) return interaction.reply({ content: 'No results found', ephemeral: true });
-      await interaction.deferReply();
+    const media = await fetchMedia(identifier);
+    if (!media) return interaction.reply({ content: 'No results found', ephemeral: true });
+    await interaction.deferReply();
 
-      const { type, result } = media;
-      let season: number | undefined;
-      let episode: number | undefined;
+    const { type, result } = media;
+    let season: number | undefined;
+    let episode: number | undefined;
 
-      if (type === 'tv') {
-        season = interaction.options.getInteger('season') ?? undefined;
-        episode = interaction.options.getInteger('episode') ?? undefined;
-      }
-
-      const scrapeMedia = transformSearchResultToScrapeMedia(type, result, season, episode);
-
-      await checkAvailability(scrapeMedia, result.poster_path ?? '', interaction);
-    } catch (ex) {
-      interaction.client.logger.error(ex);
-
-      if (interaction.replied) {
-        await interaction.followUp({ content: 'Something went wrong', ephemeral: true });
-      }
-
-      await interaction.reply({ content: 'Something went wrong', ephemeral: true });
+    if (type === 'tv') {
+      season = interaction.options.getInteger('season') ?? undefined;
+      episode = interaction.options.getInteger('episode') ?? undefined;
     }
-    return undefined;
+
+    const scrapeMedia = transformSearchResultToScrapeMedia(type, result, season, episode);
+
+    return checkAvailability(scrapeMedia, result.poster_path ?? '', interaction);
   }
 
   public override async autocompleteRun(interaction: AutocompleteInteraction) {
+    if (!interaction.isAutocomplete()) return;
+    if (interaction.responded) return;
     if (interaction.commandName !== 'available') return;
     const { name, value } = interaction.options.getFocused(true);
     if (name !== 'title') return;
