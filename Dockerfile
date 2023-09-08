@@ -6,7 +6,6 @@ WORKDIR /home/node/app
 FROM base as build
 
 COPY yarn.lock package.json ./
-COPY .git ./.git
 RUN yarn --production
 COPY . .
 RUN yarn run build
