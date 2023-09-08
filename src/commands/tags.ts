@@ -13,83 +13,103 @@ import {
 } from 'discord.js';
 
 import { tagCache } from '#src/config';
+import { isRealError } from '#src/util';
 
 export class TagsCommand extends Command {
   public override async contextMenuRun(interaction: MessageContextMenuCommandInteraction) {
-    if (!interaction.isMessageContextMenuCommand && !(interaction.targetMessage instanceof Message)) return;
-    const { author } = interaction.targetMessage;
-    const options = [...tagCache.keys()].map((key) => ({ label: key, value: key }));
+    try {
+      if (!interaction.isMessageContextMenuCommand && !(interaction.targetMessage instanceof Message)) return;
+      const { author } = interaction.targetMessage;
+      const options = [...tagCache.keys()].map((key) => ({ label: key, value: key }));
 
-    const selectMenuRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-      new StringSelectMenuBuilder()
-        .setCustomId('tag_select')
-        .setOptions(options)
-        .setPlaceholder('Select a tag')
-        .setMinValues(1)
-        .setMaxValues(1),
-    );
+      const selectMenuRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+        new StringSelectMenuBuilder()
+          .setCustomId('tag_select')
+          .setOptions(options)
+          .setPlaceholder('Select a tag')
+          .setMinValues(1)
+          .setMaxValues(1),
+      );
 
-    const buttonRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder().setCustomId('tag_confirm').setStyle(ButtonStyle.Primary).setLabel('Confirm'),
-      new ButtonBuilder().setCustomId('tag_cancel').setStyle(ButtonStyle.Secondary).setLabel('Cancel'),
-    );
+      const buttonRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder().setCustomId('tag_confirm').setStyle(ButtonStyle.Primary).setLabel('Confirm'),
+        new ButtonBuilder().setCustomId('tag_cancel').setStyle(ButtonStyle.Secondary).setLabel('Cancel'),
+      );
 
-    await interaction.reply({ components: [selectMenuRow, buttonRow], ephemeral: true });
+      await interaction.reply({ components: [selectMenuRow, buttonRow], ephemeral: true });
 
-    const filter = (i: MessageComponentInteraction) => i.user.id === interaction.user.id;
-    const collector = interaction.channel?.createMessageComponentCollector({ filter, time: 15000 });
-    let content: string | undefined;
+      const filter = (i: MessageComponentInteraction) => i.user.id === interaction.user.id;
+      const collector = interaction.channel?.createMessageComponentCollector({ filter, time: 15000 });
+      let content: string | undefined;
 
-    collector?.on('collect', async (i) => {
-      await i.deferUpdate();
+      collector?.on('collect', async (i) => {
+        await i.deferUpdate();
 
-      if (i.customId === 'tag_select') {
-        if (!i.isStringSelectMenu()) return;
-        const tag = i.values[0];
-        if (!tag) return;
+        if (i.customId === 'tag_select') {
+          if (!i.isStringSelectMenu()) return;
+          const tag = i.values[0];
+          if (!tag) return;
 
-        const selectedTag = tagCache.get(tag);
-        if (!selectedTag) return;
+          const selectedTag = tagCache.get(tag);
+          if (!selectedTag) return;
 
-        content = `${author}\n${selectedTag}`;
+          content = `${author}\n${selectedTag}`;
+        }
+
+        if (i.customId === 'tag_cancel') {
+          await interaction.deleteReply();
+          return collector.stop();
+        }
+
+        if (i.customId === 'tag_confirm') {
+          if (!content) return;
+
+          await interaction.deleteReply();
+          await i.followUp({ content, ephemeral: false });
+          return collector.stop();
+        }
+      });
+    } catch (ex) {
+      if (!isRealError(ex as Error)) {
+        throw ex;
       }
-
-      if (i.customId === 'tag_cancel') {
-        await interaction.deleteReply();
-        return collector.stop();
-      }
-
-      if (i.customId === 'tag_confirm') {
-        if (!content) return;
-
-        await interaction.deleteReply();
-        await i.followUp({ content, ephemeral: false });
-        return collector.stop();
-      }
-    });
+    }
   }
 
   public override async chatInputRun(interaction: CommandInteraction) {
-    if (!interaction.isChatInputCommand()) return;
+    try {
+      if (!interaction.isChatInputCommand()) return;
 
-    const tagKey = interaction.options.getString('key', true);
-    const user = interaction.options.getUser('mention');
-    const tag = tagCache.get(tagKey);
+      const tagKey = interaction.options.getString('key', true);
+      const user = interaction.options.getUser('mention');
+      const tag = tagCache.get(tagKey);
 
-    if (!tag) return interaction.reply({ content: 'Tag not found', ephemeral: true });
-    return interaction.reply({ content: `${user ? `${user}\n` : ''}${tag}` });
+      if (!tag) return interaction.reply({ content: 'Tag not found', ephemeral: true });
+      return interaction.reply({ content: `${user ? `${user}\n` : ''}${tag}` });
+    } catch (ex) {
+      if (!isRealError(ex as Error)) {
+        throw ex;
+      }
+      return undefined;
+    }
   }
 
   public override async autocompleteRun(interaction: AutocompleteInteraction) {
-    if (interaction.commandName !== 'tag') return;
-    const { name, value } = interaction.options.getFocused(true);
-    if (name !== 'key') return;
+    try {
+      if (interaction.commandName !== 'tag') return;
+      const { name, value } = interaction.options.getFocused(true);
+      if (name !== 'key') return;
 
-    const response = [...tagCache.keys()]
-      .filter((key) => key.includes(value))
-      .map((key) => ({ name: key, value: key }));
+      const response = [...tagCache.keys()]
+        .filter((key) => key.includes(value))
+        .map((key) => ({ name: key, value: key }));
 
-    await interaction.respond(response);
+      await interaction.respond(response);
+    } catch (ex) {
+      if (!isRealError(ex as Error)) {
+        throw ex;
+      }
+    }
   }
 
   public override registerApplicationCommands(registry: Command.Registry) {

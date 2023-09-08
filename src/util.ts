@@ -309,6 +309,17 @@ function isContextMenuPayload(payload: any): payload is IContextMenuCommandPaylo
   return payload && 'interaction' in payload;
 }
 
+const ignoredCodes = [RESTJSONErrorCodes.UnknownInteraction, RESTJSONErrorCodes.InteractionHasAlreadyBeenAcknowledged];
+
+export function isRealError(error: Error): boolean {
+  if (error instanceof DiscordAPIError || error instanceof HTTPError) {
+    if (ignoredCodes.includes(error.status)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 export function handleError(
   error: Error,
   payload:
@@ -318,16 +329,7 @@ export function handleError(
     | InteractionHandlerError
     | InteractionHandlerParseError,
 ) {
-  const ignoredCodes = [
-    RESTJSONErrorCodes.UnknownInteraction,
-    RESTJSONErrorCodes.InteractionHasAlreadyBeenAcknowledged,
-  ];
-  if (error instanceof DiscordAPIError || error instanceof HTTPError) {
-    if (ignoredCodes.includes(error.status)) {
-      return;
-    }
-  }
-
+  if (!isRealError(error)) return;
   if (!isChatInputPayload(payload) && !isContextMenuPayload(payload)) return;
 
   if (payload.interaction.deferred || payload.interaction.replied) {

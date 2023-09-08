@@ -1,44 +1,56 @@
 import { Command } from '@sapphire/framework';
 import { AutocompleteInteraction, CommandInteraction } from 'discord.js';
 
-import { checkAvailability, fetchMedia, searchTitle, transformSearchResultToScrapeMedia } from '#src/util';
+import { checkAvailability, fetchMedia, isRealError, searchTitle, transformSearchResultToScrapeMedia } from '#src/util';
 
 export class AvailableCommand extends Command {
   public override async chatInputRun(interaction: CommandInteraction) {
-    if (!interaction.isChatInputCommand()) return;
-    if (!interaction.inCachedGuild()) return;
-    if (interaction.commandName !== 'available') return;
-    if (interaction.replied || interaction.deferred) return;
+    try {
+      if (!interaction.isChatInputCommand()) return;
+      if (!interaction.inCachedGuild()) return;
+      if (interaction.commandName !== 'available') return;
+      if (interaction.replied || interaction.deferred) return;
 
-    const identifier = interaction.options.getString('title', true);
+      const identifier = interaction.options.getString('title', true);
 
-    const media = await fetchMedia(identifier);
-    if (!media) return interaction.reply({ content: 'No results found', ephemeral: true });
-    await interaction.deferReply();
+      const media = await fetchMedia(identifier);
+      if (!media) return interaction.reply({ content: 'No results found', ephemeral: true });
+      await interaction.deferReply();
 
-    const { type, result } = media;
-    let season: number | undefined;
-    let episode: number | undefined;
+      const { type, result } = media;
+      let season: number | undefined;
+      let episode: number | undefined;
 
-    if (type === 'tv') {
-      season = interaction.options.getInteger('season') ?? undefined;
-      episode = interaction.options.getInteger('episode') ?? undefined;
+      if (type === 'tv') {
+        season = interaction.options.getInteger('season') ?? undefined;
+        episode = interaction.options.getInteger('episode') ?? undefined;
+      }
+
+      const scrapeMedia = transformSearchResultToScrapeMedia(type, result, season, episode);
+
+      return checkAvailability(scrapeMedia, result.poster_path ?? '', interaction);
+    } catch (ex) {
+      if (!isRealError(ex as Error)) {
+        throw ex;
+      }
     }
-
-    const scrapeMedia = transformSearchResultToScrapeMedia(type, result, season, episode);
-
-    return checkAvailability(scrapeMedia, result.poster_path ?? '', interaction);
   }
 
   public override async autocompleteRun(interaction: AutocompleteInteraction) {
-    if (!interaction.isAutocomplete()) return;
-    if (interaction.responded) return;
-    if (interaction.commandName !== 'available') return;
-    const { name, value } = interaction.options.getFocused(true);
-    if (name !== 'title') return;
+    try {
+      if (!interaction.isAutocomplete()) return;
+      if (interaction.responded) return;
+      if (interaction.commandName !== 'available') return;
+      const { name, value } = interaction.options.getFocused(true);
+      if (name !== 'title') return;
 
-    const response = await searchTitle(value);
-    await interaction.respond(response);
+      const response = await searchTitle(value);
+      await interaction.respond(response);
+    } catch (ex) {
+      if (!isRealError(ex as Error)) {
+        throw ex;
+      }
+    }
   }
 
   public override registerApplicationCommands(registry: Command.Registry) {
