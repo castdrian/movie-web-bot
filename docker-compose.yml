@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  mw_bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    volumes:
+      - ./:/home/node/app
+    container_name: mw-bot
+    command: yarn start
