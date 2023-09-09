@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 
 import TOML from '@ltd/j-toml';
-import { APIEmbed, ActionRowData, Collection, MessageActionRowComponentData } from 'discord.js';
+import { APIEmbed, Collection } from 'discord.js';
 import { createConfigLoader } from 'neat-config';
 import { z } from 'zod';
 
@@ -35,18 +35,30 @@ export const config = createConfigLoader()
   .addZodSchema(schema)
   .load();
 
+export interface TagUrl {
+  label: string;
+  url: string;
+}
+
 interface Tag {
   isContextEnabled: boolean;
   content: string;
   embeds?: APIEmbed[];
-  components?: ActionRowData<MessageActionRowComponentData>[];
+  urls?: TagUrl[];
 }
 
 const tagSchema: z.ZodType<Tag> = z.object({
   isContextEnabled: z.boolean(),
   content: z.string(),
   embeds: z.array(z.any()).optional(),
-  components: z.array(z.any()).optional(),
+  urls: z
+    .array(
+      z.object({
+        label: z.string(),
+        url: z.string().url(),
+      }),
+    )
+    .optional(),
 });
 
 export type TagStore = Record<string, Tag>;

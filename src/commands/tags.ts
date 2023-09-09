@@ -14,7 +14,7 @@ import {
 } from 'discord.js';
 
 import { tagCache } from '#src/config';
-import { isRealError } from '#src/util';
+import { constructTagButtons, isRealError } from '#src/util';
 
 export class TagsCommand extends Command {
   public override async contextMenuRun(interaction: MessageContextMenuCommandInteraction) {
@@ -60,7 +60,7 @@ export class TagsCommand extends Command {
           replyOptions = {
             content: `${author}\n${selectedTag.content}`,
             embeds: selectedTag.embeds,
-            components: selectedTag.components,
+            components: constructTagButtons(selectedTag.urls),
           };
         }
 
@@ -101,7 +101,7 @@ export class TagsCommand extends Command {
       return interaction.reply({
         content: `${user ? `${user}\n` : ''}${tag.content}`,
         embeds: tag.embeds,
-        components: tag.components,
+        components: constructTagButtons(tag.urls),
       });
     } catch (ex) {
       if (isRealError(ex as Error)) {
