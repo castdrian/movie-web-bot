@@ -1,7 +1,13 @@
 import { readFileSync } from 'node:fs';
 
 import TOML from '@ltd/j-toml';
-import { Collection } from 'discord.js';
+import {
+  APIEmbed,
+  ActionRowData,
+  Collection,
+  MessageActionRowComponentBuilder,
+  MessageActionRowComponentData,
+} from 'discord.js';
 import { createConfigLoader } from 'neat-config';
 import { z } from 'zod';
 
@@ -35,13 +41,64 @@ export const config = createConfigLoader()
   .addZodSchema(schema)
   .load();
 
-export interface TagStore {
-  tags: Record<string, string>;
+interface Tag {
+  isContextEnabled: boolean;
+  content: string;
+  embeds?: APIEmbed[];
+  components?: ActionRowData<MessageActionRowComponentData | MessageActionRowComponentBuilder>[];
 }
 
-const tagStore = TOML.parse(readFileSync('./src/tags.toml', 'utf8')) as unknown as TagStore;
-export const tagCache = new Collection<string, string>();
+const tagSchema: z.ZodType<Tag> = z.object({
+  isContextEnabled: z.boolean(),
+  content: z.string(),
+  embeds: z.array(z.any()).optional(),
+  components: z.array(z.any()).optional(),
+});
 
-for (const [key, value] of Object.entries(tagStore.tags)) {
-  tagCache.set(key, value);
+export type TagStore = Record<string, Tag>;
+
+export function validateTags(tagStore: TagStore) {
+  for (const [key, tag] of Object.entries(tagStore)) {
+    try {
+      tagSchema.parse(tag);
+    } catch (e: any) {
+      throw new z.ZodError([{ message: `Failed to parse tag '${key}'`, ...e }]);
+    }
+  }
+  const contextEnabledTags = Object.values(tagStore).filter((tag) => tag.isContextEnabled);
+
+  if (contextEnabledTags.length === 0) {
+    throw new z.ZodError([
+      {
+        message: 'No context-enabled tags found.',
+        code: 'too_small',
+        minimum: 1,
+        inclusive: true,
+        path: ['contextEnabledTags'],
+        type: 'array',
+      },
+    ]);
+  }
+
+  if (contextEnabledTags.length > 25) {
+    throw new z.ZodError([
+      {
+        message: 'Too many context-enabled tags. Maximum allowed is 25.',
+        code: 'too_big',
+        maximum: 25,
+        inclusive: true,
+        path: ['contextEnabledTags'],
+        type: 'array',
+      },
+    ]);
+  }
+}
+
+const tagStore = TOML.parse(readFileSync('./src/tags.toml', 'utf8')) as TagStore;
+validateTags(tagStore);
+
+export const tagCache = new Collection<string, Tag>();
+
+for (const [key, tag] of Object.entries(tagStore)) {
+  tagCache.set(key, tag);
 }

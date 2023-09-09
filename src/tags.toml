@@ -1,2 +1,3 @@
-[tags]
-example_tag = "example"
+[example_tag]
+isContextEnabled = true
+content = "example"

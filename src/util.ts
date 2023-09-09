@@ -24,7 +24,7 @@ import {
 import { Counter } from 'prom-client';
 import { MovieDetails, TMDB, TvShowDetails } from 'tmdb-ts';
 
-import { Status, TagStore, config, statusEmojiIds, tagCache } from '#src/config';
+import { Status, TagStore, config, statusEmojiIds, tagCache, validateTags } from '#src/config';
 
 const tmdb = new TMDB(config.tmdbApiKey);
 
@@ -35,10 +35,11 @@ export async function updateCacheFromRemote() {
 
   if (!res) return;
 
-  const tagsStore = TOML.parse(res) as unknown as TagStore;
+  const tagStore = TOML.parse(res) as TagStore;
+  validateTags(tagStore);
 
-  for (const [key, value] of Object.entries(tagsStore.tags)) {
-    tagCache.set(key, value);
+  for (const [key, tag] of Object.entries(tagStore)) {
+    tagCache.set(key, tag);
   }
 }
 
