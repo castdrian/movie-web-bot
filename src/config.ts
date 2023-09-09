@@ -89,7 +89,7 @@ const tagSchema = z.object({
     .array(
       z.object({
         label: z.string().nonempty().max(80),
-        url: z.string().url().nonempty().max(100),
+        url: z.string().url().nonempty().max(2000),
       }),
     )
     .nonempty()
