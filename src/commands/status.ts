@@ -23,7 +23,7 @@ export class StatusCommand extends Command {
 
       await interaction.editReply({ embeds: [embed] });
     } catch (ex) {
-      if (!isRealError(ex as Error)) {
+      if (isRealError(ex as Error)) {
         throw ex;
       }
     }

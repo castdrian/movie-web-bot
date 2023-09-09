@@ -70,7 +70,7 @@ export class TagsCommand extends Command {
         }
       });
     } catch (ex) {
-      if (!isRealError(ex as Error)) {
+      if (isRealError(ex as Error)) {
         throw ex;
       }
     }
@@ -87,7 +87,7 @@ export class TagsCommand extends Command {
       if (!tag) return interaction.reply({ content: 'Tag not found', ephemeral: true });
       return interaction.reply({ content: `${user ? `${user}\n` : ''}${tag}` });
     } catch (ex) {
-      if (!isRealError(ex as Error)) {
+      if (isRealError(ex as Error)) {
         throw ex;
       }
       return undefined;
@@ -106,7 +106,7 @@ export class TagsCommand extends Command {
 
       await interaction.respond(response);
     } catch (ex) {
-      if (!isRealError(ex as Error)) {
+      if (isRealError(ex as Error)) {
         throw ex;
       }
     }
