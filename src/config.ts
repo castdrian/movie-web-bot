@@ -38,7 +38,7 @@ export const config = createConfigLoader()
   .addZodSchema(schema)
   .load();
 
-export interface TagUrl {
+export interface TagUrlButtonData {
   label: string;
   url: string;
 }

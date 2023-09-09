@@ -24,7 +24,7 @@ import {
 import { Counter } from 'prom-client';
 import { MovieDetails, TMDB, TvShowDetails } from 'tmdb-ts';
 
-import { Status, TagStore, TagUrl, config, statusEmojiIds, tagCache, validateTags } from '#src/config';
+import { Status, TagStore, TagUrlButtonData, config, statusEmojiIds, tagCache, validateTags } from '#src/config';
 
 const tmdb = new TMDB(config.tmdbApiKey);
 
@@ -339,7 +339,9 @@ export function handleError(
   return payload.interaction.reply({ content: error.message });
 }
 
-export function constructTagButtons(data: TagUrl[] | undefined): ActionRowBuilder<ButtonBuilder>[] | undefined {
+export function constructTagButtons(
+  data: TagUrlButtonData[] | undefined,
+): ActionRowBuilder<ButtonBuilder>[] | undefined {
   if (!data) return undefined;
   const actionRows: ActionRowBuilder<ButtonBuilder>[] = [];
   let actionRow = new ActionRowBuilder<ButtonBuilder>();
