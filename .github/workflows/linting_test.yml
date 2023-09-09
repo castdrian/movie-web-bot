@@ -20,13 +20,13 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 20
-          cache: 'yarn'
+          cache: 'pnpm'
       
-      - name: Install Yarn packages
-        run: yarn install
+      - name: Install dependencies
+        run: pnpm install
       
       - name: Run ESLint
-        run: yarn lint
+        run: pnpm lint
 
   building:
     name: Build project
@@ -40,10 +40,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 20
-          cache: 'yarn'
+          cache: 'pnpm'
       
-      - name: Install Yarn packages
-        run: yarn install
+      - name: Install dependencies
+        run: pnpm install
 
       - name: Build Project
-        run: yarn build
+        run: pnpm build
