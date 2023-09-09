@@ -6,11 +6,14 @@ import { createConfigLoader } from 'neat-config';
 import { z } from 'zod';
 
 const schema = z.object({
-  discordToken: z.string(),
-  guildId: z.string(),
-  tmdbApiKey: z.string(),
-  tagRefreshUrl: z.string().default('https://raw.githubusercontent.com/movie-web/discord-bot/master/src/tags.toml'),
-  mwIconUrl: z.string().default('https://movie-web.app/android-chrome-512x512.png'),
+  discordToken: z.string().nonempty(),
+  guildId: z.string().nonempty(),
+  tmdbApiKey: z.string().nonempty(),
+  tagRefreshUrl: z
+    .string()
+    .nonempty()
+    .default('https://raw.githubusercontent.com/movie-web/discord-bot/master/src/tags.toml'),
+  mwIconUrl: z.string().nonempty().default('https://movie-web.app/android-chrome-512x512.png'),
 });
 
 const prefix = 'CONF_';
@@ -49,15 +52,17 @@ interface Tag {
 
 const tagSchema: z.ZodType<Tag> = z.object({
   isContextEnabled: z.boolean(),
-  content: z.string(),
-  embeds: z.array(z.any()).optional(),
+  content: z.string().nonempty(),
+  embeds: z.array(z.any()).nonempty().optional(),
   urls: z
     .array(
       z.object({
-        label: z.string(),
-        url: z.string().url(),
+        label: z.string().nonempty(),
+        url: z.string().url().nonempty(),
       }),
     )
+    .nonempty()
+    .max(25)
     .optional(),
 });
 
