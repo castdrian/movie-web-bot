@@ -81,21 +81,26 @@ const EmbedSchema = z.object({
   fields: z.array(EmbedFieldSchema).max(25).optional(),
 });
 
-const tagSchema = z.object({
-  isContextEnabled: z.boolean(),
-  content: z.string().nonempty().max(2000),
-  embeds: z.array(EmbedSchema).nonempty().max(10).optional(),
-  urls: z
-    .array(
-      z.object({
-        label: z.string().nonempty().max(80),
-        url: z.string().url().nonempty().max(2000),
-      }),
-    )
-    .nonempty()
-    .max(25)
-    .optional(),
-});
+const tagSchema = z
+  .object({
+    isContextEnabled: z.boolean(),
+    content: z.string().nonempty().max(2000),
+    embeds: z.array(EmbedSchema).nonempty().max(10).optional(),
+    urls: z
+      .array(
+        z.object({
+          label: z.string().nonempty().max(80),
+          url: z.string().url().nonempty().max(2000),
+        }),
+      )
+      .nonempty()
+      .max(25)
+      .optional(),
+  })
+  .refine((tag) => {
+    const contextEnabledTags = tag.isContextEnabled ? 1 : 0;
+    return contextEnabledTags >= 1 && contextEnabledTags <= 25;
+  }, 'The number of context-enabled tags must be between 1 and 25.');
 
 type Tag = z.infer<typeof tagSchema>;
 export type TagStore = Record<string, Tag>;
@@ -107,33 +112,6 @@ export function validateTags(tagStore: TagStore) {
     } catch (e: any) {
       throw new z.ZodError([{ message: `Failed to parse tag '${key}'`, ...e }]);
     }
-  }
-  const contextEnabledTags = Object.values(tagStore).filter((tag) => tag.isContextEnabled);
-
-  if (contextEnabledTags.length === 0) {
-    throw new z.ZodError([
-      {
-        message: 'No context-enabled tags found.',
-        code: 'too_small',
-        minimum: 1,
-        inclusive: true,
-        path: ['contextEnabledTags'],
-        type: 'array',
-      },
-    ]);
-  }
-
-  if (contextEnabledTags.length > 25) {
-    throw new z.ZodError([
-      {
-        message: 'Too many context-enabled tags. Maximum allowed is 25.',
-        code: 'too_big',
-        maximum: 25,
-        inclusive: true,
-        path: ['contextEnabledTags'],
-        type: 'array',
-      },
-    ]);
   }
 }
 
