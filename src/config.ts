@@ -43,49 +43,52 @@ export interface TagUrlButtonData {
   url: string;
 }
 
-const EmbedThumbnailSchema = z.object({
-  url: z.string().url().max(2000),
-});
-
-const EmbedImageSchema = z.object({
-  url: z.string().url().max(2000),
-});
-
-const EmbedAuthorSchema = z.object({
-  name: z.string().max(256),
-  url: z.string().url().max(2000).optional(),
-  icon_url: z.string().url().max(2000).optional(),
-});
-
-const EmbedFooterSchema = z.object({
-  text: z.string().max(2048),
-  icon_url: z.string().url().max(2000).optional(),
-});
-
-const EmbedFieldSchema = z.object({
-  name: z.string().max(256),
-  value: z.string().max(1024),
-  inline: z.boolean().optional(),
-});
-
-const EmbedSchema = z.object({
+const embedSchema = z.object({
   title: z.string().max(256).optional(),
   description: z.string().max(4096).optional(),
   url: z.string().url().max(2000).optional(),
   timestamp: z.string().datetime().optional(),
   color: z.number().int().optional(),
-  footer: EmbedFooterSchema.optional(),
-  image: EmbedImageSchema.optional(),
-  thumbnail: EmbedThumbnailSchema.optional(),
-  author: EmbedAuthorSchema.optional(),
-  fields: z.array(EmbedFieldSchema).max(25).optional(),
+  footer: z
+    .object({
+      text: z.string().max(2048),
+      icon_url: z.string().url().max(2000).optional(),
+    })
+    .optional(),
+  image: z
+    .object({
+      url: z.string().url().max(2000),
+    })
+    .optional(),
+  thumbnail: z
+    .object({
+      url: z.string().url().max(2000),
+    })
+    .optional(),
+  author: z
+    .object({
+      name: z.string().max(256),
+      url: z.string().url().max(2000).optional(),
+      icon_url: z.string().url().max(2000).optional(),
+    })
+    .optional(),
+  fields: z
+    .array(
+      z.object({
+        name: z.string().max(256),
+        value: z.string().max(1024),
+        inline: z.boolean().optional(),
+      }),
+    )
+    .max(25)
+    .optional(),
 });
 
 const tagSchema = z
   .object({
     isContextEnabled: z.boolean(),
     content: z.string().nonempty().max(2000),
-    embeds: z.array(EmbedSchema).nonempty().max(10).optional(),
+    embeds: z.array(embedSchema).nonempty().max(10).optional(),
     urls: z
       .array(
         z.object({
