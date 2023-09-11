@@ -129,5 +129,5 @@ for (const [key, tag] of Object.entries(tagStore)) {
 
 export const mwUrls = readFileSync('./src/mw-urls.txt', 'utf8').split('\n');
 
-const mwUrlsSchema = z.array(z.string().url().nonempty().max(500)).max(100);
+const mwUrlsSchema = z.array(z.string().url().nonempty().max(100)).max(20);
 mwUrlsSchema.parse(mwUrls);
