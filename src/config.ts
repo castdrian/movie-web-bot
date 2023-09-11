@@ -126,3 +126,8 @@ export const tagCache = new Collection<string, Tag>();
 for (const [key, tag] of Object.entries(tagStore)) {
   tagCache.set(key, tag);
 }
+
+export const mwUrls = readFileSync('./src/mw-urls.txt', 'utf8').split('\n');
+
+const mwUrlsSchema = z.array(z.string().url().nonempty().max(500)).max(100);
+mwUrlsSchema.parse(mwUrls);
