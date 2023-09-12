@@ -10,7 +10,7 @@ ApplicationCommandRegistries.setDefaultGuildIds([config.guildId]);
 
 const app = fastify();
 await app.register(metricsPlugin.default, { endpoint: '/metrics' });
-await app.listen({ port: 8080 });
+await app.listen({ port: 8080, host: '0.0.0.0' });
 
 const client = new SapphireClient({
   shards: 'auto',
