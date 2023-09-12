@@ -17,5 +17,6 @@ ENV NODE_ENV=production
 COPY yarn.lock package.json ./
 RUN yarn install --frozen-lockfile --production
 COPY --from=build /home/node/app/dist ./dist
+COPY src/tags.toml ./src/tags.toml
 
 CMD ["node", "."]
