@@ -3,10 +3,10 @@ import {
   ActionRowBuilder,
   ApplicationCommandType,
   AutocompleteInteraction,
+  BaseMessageOptions,
   ButtonBuilder,
   ButtonStyle,
   CommandInteraction,
-  InteractionReplyOptions,
   Message,
   MessageComponentInteraction,
   MessageContextMenuCommandInteraction,
@@ -20,7 +20,6 @@ export class TagsCommand extends Command {
   public override async contextMenuRun(interaction: MessageContextMenuCommandInteraction) {
     try {
       if (!interaction.isMessageContextMenuCommand && !(interaction.targetMessage instanceof Message)) return;
-      const { author } = interaction.targetMessage;
 
       const options = Array.from(tagCache)
         .filter(([_key, value]) => value.isContextEnabled)
@@ -44,7 +43,7 @@ export class TagsCommand extends Command {
 
       const filter = (i: MessageComponentInteraction) => i.user.id === interaction.user.id;
       const collector = interaction.channel?.createMessageComponentCollector({ filter, time: 15000 });
-      let replyOptions: InteractionReplyOptions | undefined;
+      let replyOptions: BaseMessageOptions | undefined;
 
       collector?.on('collect', async (i) => {
         await i.deferUpdate();
@@ -58,9 +57,10 @@ export class TagsCommand extends Command {
           if (!selectedTag) return;
 
           replyOptions = {
-            content: `${author}\n${selectedTag.content}`,
+            content: selectedTag.content,
             embeds: selectedTag.embeds,
             components: constructTagButtons(selectedTag.urls),
+            allowedMentions: { repliedUser: true },
           };
         }
 
@@ -73,12 +73,7 @@ export class TagsCommand extends Command {
           if (!replyOptions) return;
 
           await interaction.deleteReply();
-          await i.followUp({
-            content: replyOptions.content,
-            embeds: replyOptions.embeds,
-            components: replyOptions.components,
-            ephemeral: false,
-          });
+          await interaction.targetMessage.reply(replyOptions);
           return collector.stop();
         }
       });

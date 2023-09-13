@@ -1,9 +1,13 @@
 import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import * as url from 'url';
 
 import TOML from '@ltd/j-toml';
 import { Collection } from 'discord.js';
 import { createConfigLoader } from 'neat-config';
 import { z } from 'zod';
+
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 const schema = z.object({
   discordToken: z.string().nonempty(),
@@ -118,7 +122,7 @@ export function validateTags(tagStore: TagStore) {
   }
 }
 
-const tagStore = TOML.parse(readFileSync('./src/tags.toml', 'utf8')) as TagStore;
+const tagStore = TOML.parse(readFileSync(path.join(__dirname, 'tags.toml'), 'utf8')) as TagStore;
 validateTags(tagStore);
 
 export const tagCache = new Collection<string, Tag>();
@@ -127,7 +131,7 @@ for (const [key, tag] of Object.entries(tagStore)) {
   tagCache.set(key, tag);
 }
 
-export const mwUrls = readFileSync('./src/mw-urls.txt', 'utf8').split('\n');
+export const mwUrls = readFileSync(path.join(__dirname, 'mw-urls.txt'), 'utf8').split('\n');
 
 const mwUrlsSchema = z.array(z.string().url().nonempty().max(100)).max(20);
 mwUrlsSchema.parse(mwUrls);

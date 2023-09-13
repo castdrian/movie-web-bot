@@ -13,7 +13,8 @@
     "lint:fix": "eslint --fix --ext .ts src",
     "lint:report": "eslint --ext .ts --output-file eslint_report.json --format json src",
     "preinstall": "npx only-allow pnpm",
-    "build": "tsc -b src",
+    "build": "tsc -b src && pnpm run copy",
+	"copy": "cp src/tags.toml dist/tags.toml && cp src/mw-urls.txt dist/mw-urls.txt",
     "clean": "tsc -b src --clean",
     "watch": "tsc -b src -w",
     "start": "pnpm run build && node dist/main.js"

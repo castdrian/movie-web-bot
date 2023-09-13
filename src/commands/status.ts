@@ -1,5 +1,5 @@
 import { Command } from '@sapphire/framework';
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, CommandInteraction } from 'discord.js';
+import { CommandInteraction } from 'discord.js';
 
 import { config, mwUrls } from '#src/config';
 import { isRealError } from '#src/util';
@@ -27,16 +27,16 @@ export class StatusCommand extends Command {
         },
       ];
 
-      const components = [
-        new ActionRowBuilder<ButtonBuilder>().addComponents(
-          new ButtonBuilder()
-            .setLabel('submit your mirror')
-            .setStyle(ButtonStyle.Link)
-            .setURL('https://github.com/movie-web/discord-bot/edit/dev/src/mw-urls.txt'),
-        ),
-      ];
+      //   const components = [
+      //     new ActionRowBuilder<ButtonBuilder>().addComponents(
+      //       new ButtonBuilder()
+      //         .setLabel('submit your mirror')
+      //         .setStyle(ButtonStyle.Link)
+      //         .setURL('https://github.com/movie-web/discord-bot/edit/dev/src/mw-urls.txt'),
+      //     ),
+      //   ];
 
-      await interaction.editReply({ embeds, components });
+      await interaction.editReply({ embeds });
     } catch (ex) {
       if (isRealError(ex as Error)) {
         throw ex;

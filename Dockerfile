@@ -13,6 +13,7 @@ RUN pnpm run build
 # Production layer
 FROM base as production
 
+EXPOSE 8080
 ENV NODE_ENV=production
 COPY pnpm-lock.yaml package.json ./
 RUN pnpm install --prod --frozen-lockfile
