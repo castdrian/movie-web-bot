@@ -5,18 +5,18 @@ WORKDIR /home/node/app
 # Build layer
 FROM base as build
 
-COPY yarn.lock package.json ./
-RUN yarn install --frozen-lockfile
+COPY pnpm-lock.yaml package.json ./
+RUN pnpm install --frozen-lockfile
 COPY . .
-RUN yarn run build
+RUN pnpm run build
 
 # Production layer
 FROM base as production
 
+EXPOSE 8080
 ENV NODE_ENV=production
-COPY yarn.lock package.json ./
-RUN yarn install --frozen-lockfile --production
+COPY pnpm-lock.yaml package.json ./
+RUN pnpm install --prod --frozen-lockfile
 COPY --from=build /home/node/app/dist ./dist
-COPY src/tags.toml ./src/tags.toml
 
 CMD ["node", "."]

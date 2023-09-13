@@ -1,2 +1,54 @@
-[tags]
-example_tag = "example"
+[cantfind]
+isContextEnabled = true
+content = """
+# Couldn't find any videos for you!
+This error means we couldn't find a video, we simply do not have it. 
+Everything still shows up in search results, but that doesn't neccesarily mean we actually have a video of it.
+"""
+
+[addthis]
+isContextEnabled = true
+content = """
+# Can you add X / When will Y be added?
+Movie-web doesn't host its own content, and thus we do not know when something will be added, nor can we add something ourselves. 
+
+Think of movie-web like google, we search the web for videos but we don't add our own, we only allow people to search.
+"""
+
+[legal]
+isContextEnabled = true
+content = """
+# Where does our content come from? Is it legal?
+We take the content directly from other sites that host content. We do not own any of the files. We simply display what we find on other sites.
+
+Think of it like Google, we search the Internet for videos, but we dont own the sites, nor the content. We merely link to them.
+
+Thus, the legality of watching the video depends on what sites it took from. We do not control that however. You can check the source section of the video settings to see what site you're watching from.
+"""
+
+[cantdownload]
+isContextEnabled = true
+content = """
+# How to download?
+Under the settings cog in the video player, you can find the download setting.
+
+**If you don't see the option, use a different source.**
+Some of our sources such as RemoteStream, GoMovies and StreamFlix do not support downloading as they work like a livestream. 
+Sources such as SuperStream do (They are served with mp4 video files).
+"""
+
+[episodes]
+isContextEnabled = true
+content = """
+# How to change episodes or seasons?
+The switch which episode you're watching, on the video player screen, click the [following button](https://media.discordapp.net/attachments/871713465578979351/1135095318036353105/image.png) shown below. 
+To change seasons, you can also click the same button but then select "seasons" top right of the popup. 
+"""
+
+[iphonecaptions]
+isContextEnabled = true
+content = """
+# Why can't I see subtitles in fullscreen on my iPhone?
+iOS does not allow custom video players to go fullscreen. Because of this, our subtitle renderer is not visible when you enter fullscreen.
+We can't currently fix this, but we're hoping to fix it in version 4.
+"""

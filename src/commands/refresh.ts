@@ -13,7 +13,7 @@ export class RefreshCommand extends Command {
         `Refreshed tag cache with \`${tagCache.size}\` tag${tagCache.size === 1 ? '' : 's'}.`,
       );
     } catch (ex) {
-      if (!isRealError(ex as Error)) {
+      if (isRealError(ex as Error)) {
         throw ex;
       }
     }

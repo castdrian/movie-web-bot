@@ -3,6 +3,7 @@ import {
   ActionRowBuilder,
   ApplicationCommandType,
   AutocompleteInteraction,
+  BaseMessageOptions,
   ButtonBuilder,
   ButtonStyle,
   CommandInteraction,
@@ -13,14 +14,16 @@ import {
 } from 'discord.js';
 
 import { tagCache } from '#src/config';
-import { isRealError } from '#src/util';
+import { constructTagButtons, isRealError } from '#src/util';
 
 export class TagsCommand extends Command {
   public override async contextMenuRun(interaction: MessageContextMenuCommandInteraction) {
     try {
       if (!interaction.isMessageContextMenuCommand && !(interaction.targetMessage instanceof Message)) return;
-      const { author } = interaction.targetMessage;
-      const options = [...tagCache.keys()].map((key) => ({ label: key, value: key }));
+
+      const options = Array.from(tagCache)
+        .filter(([_key, value]) => value.isContextEnabled)
+        .map(([key]) => ({ label: key, value: key }));
 
       const selectMenuRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
         new StringSelectMenuBuilder()
@@ -40,7 +43,7 @@ export class TagsCommand extends Command {
 
       const filter = (i: MessageComponentInteraction) => i.user.id === interaction.user.id;
       const collector = interaction.channel?.createMessageComponentCollector({ filter, time: 15000 });
-      let content: string | undefined;
+      let replyOptions: BaseMessageOptions | undefined;
 
       collector?.on('collect', async (i) => {
         await i.deferUpdate();
@@ -53,7 +56,12 @@ export class TagsCommand extends Command {
           const selectedTag = tagCache.get(tag);
           if (!selectedTag) return;
 
-          content = `${author}\n${selectedTag}`;
+          replyOptions = {
+            content: selectedTag.content,
+            embeds: selectedTag.embeds,
+            components: constructTagButtons(selectedTag.urls),
+            allowedMentions: { repliedUser: true },
+          };
         }
 
         if (i.customId === 'tag_cancel') {
@@ -62,15 +70,15 @@ export class TagsCommand extends Command {
         }
 
         if (i.customId === 'tag_confirm') {
-          if (!content) return;
+          if (!replyOptions) return;
 
           await interaction.deleteReply();
-          await i.followUp({ content, ephemeral: false });
+          await interaction.targetMessage.reply(replyOptions);
           return collector.stop();
         }
       });
     } catch (ex) {
-      if (!isRealError(ex as Error)) {
+      if (isRealError(ex as Error)) {
         throw ex;
       }
     }
@@ -85,9 +93,13 @@ export class TagsCommand extends Command {
       const tag = tagCache.get(tagKey);
 
       if (!tag) return interaction.reply({ content: 'Tag not found', ephemeral: true });
-      return interaction.reply({ content: `${user ? `${user}\n` : ''}${tag}` });
+      return interaction.reply({
+        content: `${user ? `${user}\n` : ''}${tag.content}`,
+        embeds: tag.embeds,
+        components: constructTagButtons(tag.urls),
+      });
     } catch (ex) {
-      if (!isRealError(ex as Error)) {
+      if (isRealError(ex as Error)) {
         throw ex;
       }
       return undefined;
@@ -100,13 +112,13 @@ export class TagsCommand extends Command {
       const { name, value } = interaction.options.getFocused(true);
       if (name !== 'key') return;
 
-      const response = [...tagCache.keys()]
-        .filter((key) => key.includes(value))
-        .map((key) => ({ name: key, value: key }));
+      const response = Array.from(tagCache.keys())
+        .filter((key: string) => key.includes(value))
+        .map((key: string) => ({ name: key, value: key }));
 
       await interaction.respond(response);
     } catch (ex) {
-      if (!isRealError(ex as Error)) {
+      if (isRealError(ex as Error)) {
         throw ex;
       }
     }
