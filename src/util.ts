@@ -24,7 +24,7 @@ import { Counter } from 'prom-client';
 import { MovieDetails, TMDB, TvShowDetails } from 'tmdb-ts';
 
 import { Status, TagStore, TagUrlButtonData, config, statusEmojiIds, tagCache, validateTags } from '#src/config';
-import { parseToml } from '#src/toml.js';
+import { parseToml } from '#src/toml';
 
 const tmdb = new TMDB(config.tmdbApiKey);
 

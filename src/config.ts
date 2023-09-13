@@ -5,7 +5,7 @@ import * as url from 'url';
 import { Collection } from 'discord.js';
 import { createConfigLoader } from 'neat-config';
 import { z } from 'zod';
-import { parseToml } from '#src/toml.js';
+import { parseToml } from '#src/toml';
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
