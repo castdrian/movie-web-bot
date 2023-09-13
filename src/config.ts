@@ -2,10 +2,10 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import * as url from 'url';
 
-import TOML from '@ltd/j-toml';
 import { Collection } from 'discord.js';
 import { createConfigLoader } from 'neat-config';
 import { z } from 'zod';
+import { parseToml } from '#src/toml.js';
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
@@ -122,7 +122,7 @@ export function validateTags(tagStore: TagStore) {
   }
 }
 
-const tagStore = TOML.parse(readFileSync(path.join(__dirname, 'tags.toml'), 'utf8')) as TagStore;
+const tagStore = parseToml<TagStore>(readFileSync(path.join(__dirname, 'tags.toml'), 'utf8'));
 validateTags(tagStore);
 
 export const tagCache = new Collection<string, Tag>();
