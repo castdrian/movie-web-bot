@@ -30,7 +30,7 @@ export class AvailableCommand extends Command {
 
       return checkAvailability(scrapeMedia, result.poster_path ?? '', interaction);
     } catch (ex) {
-      if (!isRealError(ex as Error)) {
+      if (isRealError(ex as Error)) {
         throw ex;
       }
     }
@@ -47,7 +47,7 @@ export class AvailableCommand extends Command {
       const response = await searchTitle(value);
       await interaction.respond(response);
     } catch (ex) {
-      if (!isRealError(ex as Error)) {
+      if (isRealError(ex as Error)) {
         throw ex;
       }
     }

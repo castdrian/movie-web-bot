@@ -1,6 +1,6 @@
 {
   "name": "mw-bot",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "movie-web discord bot",
   "main": "dist/main.js",
   "repository": "git@github.com:movie-web/discord-bot.git",
@@ -12,11 +12,12 @@
     "lint": "eslint --ext .ts src",
     "lint:fix": "eslint --fix --ext .ts src",
     "lint:report": "eslint --ext .ts --output-file eslint_report.json --format json src",
-    "update": "yarn upgrade-interactive",
-    "build": "tsc -b src",
+    "preinstall": "npx only-allow pnpm",
+    "build": "tsc -b src && pnpm run copy",
+	"copy": "cp src/tags.toml dist/tags.toml && cp src/mw-urls.txt dist/mw-urls.txt",
     "clean": "tsc -b src --clean",
     "watch": "tsc -b src -w",
-    "start": "yarn run build && node dist/main.js"
+    "start": "pnpm run build && node dist/main.js"
   },
   "dependencies": {
     "@ltd/j-toml": "^1.38.0",

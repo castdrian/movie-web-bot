@@ -1,7 +1,7 @@
 import { Command } from '@sapphire/framework';
 import { CommandInteraction } from 'discord.js';
 
-import { config } from '#src/config';
+import { config, mwUrls } from '#src/config';
 import { isRealError } from '#src/util';
 
 export class StatusCommand extends Command {
@@ -9,21 +9,36 @@ export class StatusCommand extends Command {
     try {
       await interaction.deferReply();
 
-      const host = 'https://movie-web.app/';
-      const { ok } = await fetch(host);
+      const description = await Promise.all(
+        mwUrls.map(async (url) => {
+          const { ok } = await fetch(url).catch(() => ({ ok: false }));
+          return `**${url}** ${ok ? `🟢 UP` : '🔴 DOWN'}`;
+        }),
+      ).then((lines) => lines.join('\n'));
 
-      const embed = {
-        title: 'mw status',
-        description: `**Host:** ${host}\n**Status:** ${ok ? `🟢 UP` : '🔴 DOWN'}`,
-        thumbnail: {
-          url: this.container.client.user?.displayAvatarURL() ?? config.mwIconUrl,
+      const embeds = [
+        {
+          title: 'mw status',
+          description,
+          thumbnail: {
+            url: this.container.client.user?.displayAvatarURL() ?? config.mwIconUrl,
+          },
+          color: 0xa87fd1,
         },
-        color: 0xa87fd1,
-      };
+      ];
 
-      await interaction.editReply({ embeds: [embed] });
+      //   const components = [
+      //     new ActionRowBuilder<ButtonBuilder>().addComponents(
+      //       new ButtonBuilder()
+      //         .setLabel('submit your mirror')
+      //         .setStyle(ButtonStyle.Link)
+      //         .setURL('https://github.com/movie-web/discord-bot/edit/dev/src/mw-urls.txt'),
+      //     ),
+      //   ];
+
+      await interaction.editReply({ embeds });
     } catch (ex) {
-      if (!isRealError(ex as Error)) {
+      if (isRealError(ex as Error)) {
         throw ex;
       }
     }

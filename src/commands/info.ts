@@ -30,7 +30,7 @@ export class InfoCommand extends Command {
 
       await interaction.editReply({ embeds: [embed], components: [row] });
     } catch (ex) {
-      if (!isRealError(ex as Error)) {
+      if (isRealError(ex as Error)) {
         throw ex;
       }
     }
