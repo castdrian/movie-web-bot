@@ -1,6 +1,7 @@
 # Base layer
 FROM node:20.5.1-alpine as base
 WORKDIR /home/node/app
+RUN npm i -g pnpm
 
 # Build layer
 FROM base as build

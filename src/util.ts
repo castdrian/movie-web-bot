@@ -1,5 +1,6 @@
 import TOML from '@ltd/j-toml';
 import { RunnerOptions, ScrapeMedia, makeProviders, makeStandardFetcher, targets } from '@movie-web/providers';
+
 import {
   IChatInputCommandPayload,
   IContextMenuCommandPayload,
@@ -25,6 +26,7 @@ import { Counter } from 'prom-client';
 import { MovieDetails, TMDB, TvShowDetails } from 'tmdb-ts';
 
 import { Status, TagStore, TagUrlButtonData, config, statusEmojiIds, tagCache, validateTags } from '#src/config';
+import { parseToml } from '#src/toml';
 
 const tmdb = new TMDB(config.tmdbApiKey);
 
@@ -35,7 +37,7 @@ export async function updateCacheFromRemote() {
 
   if (!res) return;
 
-  const tagStore = TOML.parse(res) as TagStore;
+  const tagStore = parseToml<TagStore>(res);
   validateTags(tagStore);
 
   for (const [key, tag] of Object.entries(tagStore)) {
