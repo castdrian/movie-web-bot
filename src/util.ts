@@ -97,7 +97,7 @@ export async function checkAvailability(
   posterPath: string,
   interaction: CommandInteraction,
 ): Promise<void> {
-  const providers = makeProviders({ fetcher: makeStandardFetcher(fetch), target: targets.ALL });
+  const providers = makeProviders({ fetcher: makeStandardFetcher(fetch), target: targets.BROWSER });
   const cache = new CacheCollection();
 
   cache.setMedia(media);
