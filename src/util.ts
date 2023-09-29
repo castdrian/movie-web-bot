@@ -1,4 +1,4 @@
-import { RunnerOptions, ScrapeMedia, makeProviders, makeStandardFetcher } from '@movie-web/providers';
+import { RunnerOptions, ScrapeMedia, makeProviders, makeStandardFetcher, targets } from '@movie-web/providers';
 import {
   IChatInputCommandPayload,
   IContextMenuCommandPayload,
@@ -97,7 +97,7 @@ export async function checkAvailability(
   posterPath: string,
   interaction: CommandInteraction,
 ): Promise<void> {
-  const providers = makeProviders({ fetcher: makeStandardFetcher(fetch as any) });
+  const providers = makeProviders({ fetcher: makeStandardFetcher(fetch), target: targets.BROWSER });
   const cache = new CacheCollection();
 
   cache.setMedia(media);
