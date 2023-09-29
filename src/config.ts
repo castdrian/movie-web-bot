@@ -122,7 +122,7 @@ export function validateTags(tagStore: TagStore) {
   }
 }
 
-const tagStore = TOML.parse(readFileSync(path.join(__dirname, 'tags.toml'), 'utf8')) as TagStore;
+const tagStore = TOML.parse(readFileSync(path.join(__dirname, 'tags.toml'), 'utf8'), '\n') as TagStore;
 validateTags(tagStore);
 
 export const tagCache = new Collection<string, Tag>();
