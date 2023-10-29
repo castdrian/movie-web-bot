@@ -42,8 +42,8 @@ dependencies:
     specifier: ^2.6.1
     version: 2.6.1
   zod:
-    specifier: ^3.22.2
-    version: 3.22.2
+    specifier: ^3.22.3
+    version: 3.22.3
 
 devDependencies:
   '@sapphire/eslint-config':
@@ -2368,7 +2368,7 @@ packages:
     resolution: {integrity: sha512-lSj6iux36bIENAScCXAr1zUrZJIV4uhD6L+H1PDfyB2FfVs2XSDetP6rXzFONL1BI/kaJ4anypAT73zdNdyjEA==}
     dependencies:
       joi: 17.10.1
-      zod: 3.22.2
+      zod: 3.22.3
     dev: false
 
   /node-fetch@2.7.0:
@@ -3247,6 +3247,6 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /zod@3.22.2:
-    resolution: {integrity: sha512-wvWkphh5WQsJbVk1tbx1l1Ly4yg+XecD+Mq280uBGt9wa5BKSWf4Mhp6GmrkPixhMxmabYY7RbzlwVP32pbGCg==}
+  /zod@3.22.3:
+    resolution: {integrity: sha512-EjIevzuJRiRPbVH4mGc8nApb/lVLKVpmUhAaR5R5doKGfAnGJ6Gr3CViAVjP+4FWSxCsybeWQdcgCtbX+7oZug==}
     dev: false
