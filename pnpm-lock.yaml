@@ -9,8 +9,8 @@ dependencies:
     specifier: ^1.38.0
     version: 1.38.0
   '@movie-web/providers':
-    specifier: ^1.0.2
-    version: 1.0.2
+    specifier: ^1.0.3
+    version: 1.0.3
   '@sapphire/decorators':
     specifier: ^6.0.1
     version: 6.0.2
@@ -42,8 +42,8 @@ dependencies:
     specifier: ^2.6.1
     version: 2.6.1
   zod:
-    specifier: ^3.22.2
-    version: 3.22.2
+    specifier: ^3.22.3
+    version: 3.22.3
 
 devDependencies:
   '@sapphire/eslint-config':
@@ -258,11 +258,11 @@ packages:
     resolution: {integrity: sha512-lYtBcmvHustHQtg4X7TXUu1Xa/tbLC3p2wLvgQI+fWVySguVZJF60Snxijw5EiohumxZbR10kWYFFebh1zotiw==}
     dev: false
 
-  /@movie-web/providers@1.0.2:
-    resolution: {integrity: sha512-MC2N/qEx0tjlm8qx3Yr91/KMewsP0fdo2F0ZEmlzqfiGA0bJB6mJebTerHoO1TlG7ezvkpkOSaQdvnoQdTbn2g==}
+  /@movie-web/providers@1.0.3:
+    resolution: {integrity: sha512-TQhzW0wSpuEImv0XRGDZmxpJoteIoitXy/ScAvQmYLRBnDwR/WKcW25s8kz7GZrV2DGRudyK0zpYQ3ZOtlX1ag==}
     dependencies:
       cheerio: 1.0.0-rc.12
-      crypto-js: 4.1.1
+      crypto-js: 4.2.0
       form-data: 4.0.0
       nanoid: 3.3.6
       node-fetch: 2.7.0
@@ -999,8 +999,8 @@ packages:
       which: 2.0.2
     dev: true
 
-  /crypto-js@4.1.1:
-    resolution: {integrity: sha512-o2JlM7ydqd3Qk9CA0L4NL6mTzU2sdx96a+oOfPu8Mkl/PK51vSyoi8/rQ8NknZtk44vq15lmhAj9CIAGwgeWKw==}
+  /crypto-js@4.2.0:
+    resolution: {integrity: sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==}
     dev: false
 
   /css-select@5.1.0:
@@ -2368,7 +2368,7 @@ packages:
     resolution: {integrity: sha512-lSj6iux36bIENAScCXAr1zUrZJIV4uhD6L+H1PDfyB2FfVs2XSDetP6rXzFONL1BI/kaJ4anypAT73zdNdyjEA==}
     dependencies:
       joi: 17.10.1
-      zod: 3.22.2
+      zod: 3.22.3
     dev: false
 
   /node-fetch@2.7.0:
@@ -3247,6 +3247,6 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /zod@3.22.2:
-    resolution: {integrity: sha512-wvWkphh5WQsJbVk1tbx1l1Ly4yg+XecD+Mq280uBGt9wa5BKSWf4Mhp6GmrkPixhMxmabYY7RbzlwVP32pbGCg==}
+  /zod@3.22.3:
+    resolution: {integrity: sha512-EjIevzuJRiRPbVH4mGc8nApb/lVLKVpmUhAaR5R5doKGfAnGJ6Gr3CViAVjP+4FWSxCsybeWQdcgCtbX+7oZug==}
     dev: false
