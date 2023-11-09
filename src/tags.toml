@@ -45,6 +45,13 @@ The switch which episode you're watching, on the video player screen, click the 
 To change seasons, you can also click the same button but then select "seasons" top right of the popup. 
 """
 
+[dubs]
+isContextEnabled = true
+content = """
+# Can I play this movie or TV show in another language?
+It's not possible to watch content in other languages on movie-web. We don't intend to add this feature soon, so you're most likely better off searching for a website that provides content in your desired language!
+"""
+
 [iphonecaptions]
 isContextEnabled = true
 content = """
