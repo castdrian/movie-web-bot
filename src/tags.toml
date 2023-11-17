@@ -41,7 +41,7 @@ Sources such as SuperStream do (They are served with mp4 video files).
 isContextEnabled = true
 content = """
 # How to change episodes or seasons?
-The switch which episode you're watching, on the video player screen, click the [following button](https://media.discordapp.net/attachments/871713465578979351/1135095318036353105/image.png) shown below. 
+The switch which episode you're watching, on the video player screen, click the [button](https://media.discordapp.net/attachments/871713465578979351/1135095318036353105/image.png) shown below. 
 To change seasons, you can also click the same button but then select "seasons" top right of the popup. 
 """
 
@@ -50,6 +50,9 @@ isContextEnabled = true
 content = """
 # Can I play this movie or TV show in another language?
 It's not possible to watch content in other languages on movie-web. We don't intend to add this feature soon, so you're most likely better off searching for a website that provides content in your desired language!
+Here is a list of non-english :pirate_flag: sites:
+<https://fmhy.pages.dev/non-english>
+Find your language in the sidebar and look under the Streaming section. [Use this adblocker!](<https://ublockrigin.com>)
 """
 
 [iphonecaptions]
@@ -58,4 +61,13 @@ content = """
 # Why can't I see subtitles in fullscreen on my iPhone?
 iOS does not allow custom video players to go fullscreen. Because of this, our subtitle renderer is not visible when you enter fullscreen.
 We can't currently fix this, but we're hoping to fix it in version 4.
+"""
+
+[apps]
+isContextEnabled = true
+content = """
+# Where is the app download?
+While there are no native movie-web apps, you can install it as a [PWA](https://cdn.discordapp.com/attachments/656888828430385171/1174969037403459624/IMG_4763_1.PNG) on mobile devices:
+[iOS guide](<https://www.wikihow.com/Install-Web-Apps-on-iPhone-or-iPad>)
+[Android guide](<https://support.google.com/chrome/answer/9658361?co=GENIE.Platform%3DAndroid&oco=1>)
 """
