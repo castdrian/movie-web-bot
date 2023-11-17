@@ -70,3 +70,12 @@ While there are no native movie-web apps, you can install it as a [PWA](https://
 [iOS guide](<https://www.wikihow.com/Install-Web-Apps-on-iPhone-or-iPad>)
 [Android guide](<https://support.google.com/chrome/answer/9658361?co=GENIE.Platform%3DAndroid&oco=1>)
 """
+
+[v4]
+isContextEnabled = true
+content = """
+# When will v4 come out?
+Soon:tm:
+You can check the planned features and their status [here](https://github.com/orgs/movie-web/projects/1).
+If you're a developer and want to help, see [here](https://github.com/movie-web/movie-web/issues/348).
+"""
