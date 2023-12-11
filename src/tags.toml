@@ -79,3 +79,13 @@ Soon:tm:
 You can check the planned features and their status [here](https://github.com/orgs/movie-web/projects/1).
 If you're a developer and want to help, see [here](https://github.com/movie-web/movie-web/issues/348).
 """
+
+[theatre]
+isContextEnabled = true
+content = """
+# Why can't I watch this movie yet?
+
+The movie you are trying to watch only came out in theatres very recently. We don't control our content, and it is not possible for us to show movies that haven't come out on streaming yet. 
+
+We also won't point you to any other sources, so you're best off going to the actual movie theatre or waiting until it comes out on streaming. Don't ask us for other sources or we'll have to ban you.
+"""
