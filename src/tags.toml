@@ -89,3 +89,11 @@ The movie you are trying to watch only came out in theatres very recently. We do
 
 We also won't point you to any other sources, so you're best off going to the actual movie theatre or waiting until it comes out on streaming. Asking for or providing other sources is against the rules and will result in a ban.
 """
+
+[squeezebox]
+isContextEnabled = true
+content = """
+# What is the new domain? Why did the site stop working?
+
+The site has moved to https://movie-web.app. The old domain is no longer functional. It stopped working because we moved to a new domain. Update your bookmarks, tell your friends! Don't ask us restore functionality to the old link, or else 😈
+"""
