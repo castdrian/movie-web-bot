@@ -11,7 +11,7 @@ const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 const schema = z.object({
   discordToken: z.string().min(1),
-  guildId: z.string().min(1),
+  guildId: z.string().min(17),
   tmdbApiKey: z.string().min(1),
   tagRefreshUrl: z
     .string()
