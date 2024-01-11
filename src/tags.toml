@@ -32,17 +32,16 @@ content = """
 # How to download?
 Under the settings cog in the video player, you can find the download setting.
 
-**If you don't see the option, use a different source.**
-Some of our sources such as RemoteStream, GoMovies and StreamFlix do not support downloading as they work like a livestream. 
-Sources such as SuperStream do (They are served with mp4 video files).
+**If the option mentions downloading a playlist, then you'll be downloading a HLS playlist, you can play this file using VLC.**
+Currently, the only source that supports downloading an MP4 file is Showbox, but this source is not available if you're using the public proxy.
 """
 
 [episodes]
 isContextEnabled = true
 content = """
-# How to change episodes or seasons?
-The switch which episode you're watching, on the video player screen, click the [button](https://media.discordapp.net/attachments/871713465578979351/1135095318036353105/image.png) shown below. 
-To change seasons, you can also click the same button but then select "seasons" top right of the popup. 
+# How can I change episodes or seasons?
+To switch which episode you're watching, you can click the [button](https://media.discordapp.net/attachments/871713465578979351/1135095318036353105/image.png) shown below in the video player. 
+To change seasons, you can also click the same button but then select "Seasons" top right of the popup. 
 """
 
 [dubs]
@@ -71,13 +70,14 @@ While there are no native movie-web apps, you can install it as a [PWA](https://
 [Android guide](<https://support.google.com/chrome/answer/9658361?co=GENIE.Platform%3DAndroid&oco=1>)
 """
 
-[v4]
+[v5]
 isContextEnabled = true
 content = """
-# When will v4 come out?
-Soon:tm:
-You can check the planned features and their status [here](https://github.com/orgs/movie-web/projects/1).
-If you're a developer and want to help, see [here](https://github.com/movie-web/movie-web/issues/348).
+# When will v5 come out?
+We don't know. We're working on it, but we don't have a release date yet:tm:.
+
+You can check the planned features and their status [here](https://github.com/orgs/movie-web/projects/2).
+If you're a developer and want to help, you can ask to be assigned to an issue on GitHub.
 """
 
 [theatre]
@@ -96,4 +96,26 @@ content = """
 # What is the new domain? Why did the site stop working?
 
 The site has moved to https://movie-web.app. The old domain is no longer functional. It stopped working because we moved to a new domain. Update your bookmarks, tell your friends! Don't ask us restore functionality to the old link, or else 😈
+"""
+
+[showbox]
+isContextEnabled = true
+content = """
+# What happened to Showbox/Febbox?
+
+[Showbox/Febbox is no longer supported on our public proxies](<https://discord.com/channels/871713465100816424/1116430057922121760/1194388487424708788>), meaning that you have to host one yourself.
+Doing so is simple and can be done for free and within 5 minutes, see [here](<https://docs.movie-web.app/proxy/deploy>).
+
+If you need any extra help with setting up a custom proxy, you can ask for help in the [#custom-proxy](<https://discord.com/channels/871713465100816424/1194388816279113798>) channel.
+"""
+
+[hls]
+isContextEnabled = true
+content = """
+# Why can't I download an MP4?
+
+Most of our sources do not support downloading an MP4 file, this is because they use HLS (HTTP Live Streaming) to serve the video. HLS is a streaming protocol, and thus does not allow downloading the video itself.
+
+However, you can download the HLS playlist by clicking the "Download playlist" button in the download menu.
+Once downloaded, use VLC to play the m3u8 playlist file.
 """
