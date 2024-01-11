@@ -108,14 +108,3 @@ Doing so is simple and can be done for free and within 5 minutes, see [here](<ht
 
 If you need any extra help with setting up a custom proxy, you can ask for help in the [#custom-proxy](<https://discord.com/channels/871713465100816424/1194388816279113798>) channel.
 """
-
-[hls]
-isContextEnabled = true
-content = """
-# Why can't I download an MP4?
-
-Most of our sources do not support downloading an MP4 file, this is because they use HLS (HTTP Live Streaming) to serve the video. HLS is a streaming protocol, and thus does not allow downloading the video itself.
-
-However, you can download the HLS playlist by clicking the "Download playlist" button in the download menu.
-Once downloaded, use VLC to play the m3u8 playlist file.
-"""
