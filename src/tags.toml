@@ -41,7 +41,7 @@ isContextEnabled = true
 content = """
 # How can I change episodes or seasons?
 To switch which episode you're watching, you can click the [button](https://media.discordapp.net/attachments/871713465578979351/1135095318036353105/image.png) shown below in the video player. 
-To change seasons, you can also click the same button but then select "Seasons" top right of the popup. 
+To change seasons, you click the same button as before, but then click the arrow top left of the popup.
 """
 
 [dubs]
