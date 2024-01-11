@@ -53,10 +53,10 @@ export async function searchTitle(query: string): Promise<ApplicationCommandOpti
     return results.slice(0, 25).map((result) => {
       const identifier = `${result.media_type}:${result.id}`;
       if (result.media_type === 'tv') {
-        return { name: result.name, value: identifier };
+        return { name: `${result.name} (${new Date(result.first_air_date).getFullYear()})`, value: identifier };
       }
       if (result.media_type === 'movie') {
-        return { name: result.title, value: identifier };
+        return { name: `${result.title} (${new Date(result.release_date).getFullYear()})`, value: identifier };
       }
       return { name: 'No results found', value: 'empty' };
     });
