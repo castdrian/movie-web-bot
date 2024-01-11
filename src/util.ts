@@ -53,10 +53,10 @@ export async function searchTitle(query: string): Promise<ApplicationCommandOpti
     return results.slice(0, 25).map((result) => {
       const identifier = `${result.media_type}:${result.id}`;
       if (result.media_type === 'tv') {
-        return { name: result.name, value: identifier };
+        return { name: `${result.name} (${new Date(result.first_air_date).getFullYear()})`, value: identifier };
       }
       if (result.media_type === 'movie') {
-        return { name: result.title, value: identifier };
+        return { name: `${result.title} (${new Date(result.release_date).getFullYear()})`, value: identifier };
       }
       return { name: 'No results found', value: 'empty' };
     });
@@ -217,16 +217,23 @@ async function makeResponseEmbed(
     return void interaction.editReply('An error occurred while collecting providers.');
   }
 
+  let title = `${media.title} (${media.releaseYear})`;
+  if (media.type === 'show' && media.season && media.episode) {
+    title = `${media.title} S${media.season.number.toString().padStart(2, '0')}E${media.episode.number
+      .toString()
+      .padStart(2, '0')} (${media.releaseYear})`;
+  }
+
   const description = sources
     .map((source) => {
       const sourceStatus = status.find((s) => s.id === source);
       if (!sourceStatus) return undefined;
-      return `\`${source}\` ${getStatusEmote(sourceStatus.status, interaction.client)}`;
+      return `${getStatusEmote(sourceStatus.status, interaction.client)} \`${source}\``;
     })
     .join('\n');
 
   const embed = {
-    title: `${media.title} (${media.releaseYear})`,
+    title,
     description,
     color: 0xa87fd1,
     thumbnail: {
