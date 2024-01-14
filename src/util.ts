@@ -142,24 +142,30 @@ export async function checkAvailability(
     cache.setStatus(status);
     await makeResponseEmbed(cache, interaction);
 
-    const sourceResult = await providers
+    const timeoutPromise = timeout(10000).then(() => undefined);
+
+    const sourceResultPromise = providers
       .runSourceScraper({
         id: source.id,
         media,
       })
       .catch(() => undefined);
 
+    const sourceResult = await Promise.race([sourceResultPromise, timeoutPromise]);
+
     if (sourceResult) {
       sourceResults.push(sourceResult);
       sourceStatus.status = Status.SUCCESS;
 
       for (const embed of sourceResult.embeds) {
-        const embedResult = await providers
+        const embedResultPromise = providers
           .runEmbedScraper({
             id: embed.embedId,
             url: embed.url,
           })
           .catch(() => undefined);
+
+        const embedResult = await Promise.race([embedResultPromise, timeoutPromise]);
 
         if (embedResult) {
           embedResults.push(embedResult);
@@ -419,4 +425,10 @@ export function constructTagButtons(
 
   actionRows.push(actionRow);
   return actionRows;
+}
+
+function timeout(ms: number) {
+  return new Promise((_, reject) => {
+    setTimeout(() => reject(new Error('timeout')), ms);
+  });
 }
