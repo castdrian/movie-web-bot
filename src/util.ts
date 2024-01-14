@@ -1,4 +1,4 @@
-import { RunnerOptions, ScrapeMedia, makeProviders, makeStandardFetcher, targets } from '@movie-web/providers';
+import { ProviderControls, RunnerOptions, ScrapeMedia, Targets, targets } from '@movie-web/providers';
 import {
   IChatInputCommandPayload,
   IContextMenuCommandPayload,
@@ -23,7 +23,7 @@ import {
 import { Counter } from 'prom-client';
 import { MovieDetails, TMDB, TvShowDetails } from 'tmdb-ts';
 
-import { Status, TagUrlButtonData, config, statusEmojiIds } from '#src/config';
+import { SourceType, Status, TagUrlButtonData, config, statusEmojiIds } from '#src/config';
 
 const tmdb = new TMDB(config.tmdbApiKey);
 
@@ -76,22 +76,53 @@ export async function fetchMedia(
   }
 }
 
+export interface Providers {
+  providers: ProviderControls;
+  target: Targets;
+}
+
 export async function checkAvailability(
   media: ScrapeMedia,
   posterPath: string,
   interaction: CommandInteraction,
+  providers: Providers[],
 ): Promise<void> {
-  const providers = makeProviders({ fetcher: makeStandardFetcher(fetch), target: targets.BROWSER });
   const cache = new CacheCollection();
 
   cache.setMedia(media);
   cache.setPosterPath(posterPath);
 
+  const targetPriority = {
+    [targets.ANY]: NaN,
+    [targets.BROWSER]: 1,
+    [targets.BROWSER_EXTENSION]: 2,
+    [targets.NATIVE]: 3,
+  };
+
+  const sourceTargetMap: Map<string, { id: string; target: Targets }> = new Map();
+
+  for (const provider of providers) {
+    const sources = provider.providers.listSources();
+
+    for (const source of sources) {
+      const currentTargetPriority = targetPriority[provider.target];
+      const existingTargetPriority = sourceTargetMap.has(source.id)
+        ? targetPriority[sourceTargetMap.get(source.id)!.target]
+        : Infinity;
+
+      if (currentTargetPriority < existingTargetPriority) {
+        sourceTargetMap.set(source.id, { id: source.id, target: provider.target });
+      }
+    }
+  }
+
+  const uniqueSourcesWithTarget = Array.from(sourceTargetMap.values());
+  cache.setSources(uniqueSourcesWithTarget);
+
   const options: RunnerOptions = {
     media,
     events: {
       init(e) {
-        cache.setSources(e.sourceIds);
         cache.setStatus(e.sourceIds.map((id) => ({ id, status: Status.WAITING })));
         void makeResponseEmbed(cache, interaction);
       },
@@ -126,28 +157,30 @@ export async function checkAvailability(
     },
   };
 
-  const results = await providers.runAll(options);
-  const status = cache.getStatus();
+  for (const targetProviders of providers) {
+    const results = await targetProviders.providers.runAll(options);
+    const status = cache.getStatus();
 
-  if (results) {
-    const actionRow = new ActionRowBuilder<ButtonBuilder>().setComponents(
-      new ButtonBuilder()
-        .setLabel('watch on movie-web')
-        .setStyle(ButtonStyle.Link)
-        .setURL(`https://movie-web.app/media/tmdb-${media.type}-${media.tmdbId}`),
-    );
+    if (results) {
+      const actionRow = new ActionRowBuilder<ButtonBuilder>().setComponents(
+        new ButtonBuilder()
+          .setLabel('watch on movie-web')
+          .setStyle(ButtonStyle.Link)
+          .setURL(`https://movie-web.app/media/tmdb-${media.type}-${media.tmdbId}`),
+      );
 
-    await interaction.editReply({ components: [actionRow] });
+      await interaction.editReply({ components: [actionRow] });
+    }
+
+    if (status) {
+      status.forEach((s) => {
+        if (s.status === Status.LOADING) s.status = Status.SUCCESS;
+      });
+      cache.setStatus(status);
+    }
+
+    await makeResponseEmbed(cache, interaction, Boolean(results));
   }
-
-  if (status) {
-    status.forEach((s) => {
-      if (s.status === Status.LOADING) s.status = Status.SUCCESS;
-    });
-    cache.setStatus(status);
-  }
-
-  await makeResponseEmbed(cache, interaction, Boolean(results));
 }
 
 export function transformSearchResultToScrapeMedia(
@@ -188,6 +221,21 @@ export function transformSearchResultToScrapeMedia(
   throw new Error('Invalid type parameter');
 }
 
+interface Source {
+  id: string;
+  target: Targets;
+}
+
+function makeSourceString(source: Source, status: Status, client: Client): string {
+  const targetMap = {
+    [targets.BROWSER_EXTENSION]: SourceType.EXTENSION,
+    [targets.NATIVE]: SourceType.NATIVE,
+  };
+
+  const specialTarget = Object.entries(targetMap).find(([key]) => key === source.target)?.[1];
+  return `${getStatusEmote(status, client)} \`${source.id}\`${specialTarget ? specialTarget : ''}`;
+}
+
 async function makeResponseEmbed(
   cache: CacheCollection,
   interaction: CommandInteraction,
@@ -210,15 +258,15 @@ async function makeResponseEmbed(
 
   const description = sources
     .map((source) => {
-      const sourceStatus = status.find((s) => s.id === source);
+      const sourceStatus = status.find((s) => s.id === source.id);
       if (!sourceStatus) return undefined;
-      return `${getStatusEmote(sourceStatus.status, interaction.client)} \`${source}\``;
+      return makeSourceString(source, sourceStatus.status, interaction.client);
     })
     .join('\n');
 
   const embed = {
     title,
-    description,
+    description: `${description}\n\n${SourceType.CUSTOM_PROXY} source requires a [custom proxy](<https://docs.movie-web.app/proxy/deploy>) or below\n${SourceType.EXTENSION} source requires the [browser extension](<https://github.com/movie-web/extension/releases/latest>) or below\n${SourceType.NATIVE} source requires the [native app](<https://github.com/movie-web/native-app/releases/latest>)`,
     color: 0xa87fd1,
     thumbnail: {
       url: getMediaPoster(cache.getPosterPath()!),
@@ -255,12 +303,12 @@ function getStatusEmote(status: Status, client: Client): GuildEmoji {
 }
 
 class CacheCollection extends Collection<string, any> {
-  public setSources(value: string[]) {
+  public setSources(value: Source[]) {
     this.set('sources', value);
   }
 
-  public getSources(): string[] | undefined {
-    return this.get('sources') as string[] | undefined;
+  public getSources(): Source[] | undefined {
+    return this.get('sources') as Source[] | undefined;
   }
 
   public getStatus(): ProviderStatus[] | undefined {

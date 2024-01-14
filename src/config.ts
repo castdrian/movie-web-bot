@@ -18,6 +18,12 @@ const schema = z.object({
 
 const prefix = 'CONF_';
 
+export enum SourceType {
+  CUSTOM_PROXY = 'ᵖʳᵒˣʸ',
+  EXTENSION = 'ᵉˣᵗ',
+  NATIVE = 'ᵃᵖᵖ',
+}
+
 export enum Status {
   WAITING,
   LOADING,
