@@ -1,4 +1,4 @@
-import { RunnerOptions, ScrapeMedia, Targets, makeProviders, makeStandardFetcher, targets } from '@movie-web/providers';
+import { ScrapeMedia, Targets, makeProviders, makeStandardFetcher, targets } from '@movie-web/providers';
 import {
   IChatInputCommandPayload,
   IContextMenuCommandPayload,
@@ -125,45 +125,57 @@ export async function checkAvailability(
   const uniqueSourcesWithTarget = Array.from(sourceTargetMap.values()).sort((a, b) => b.rank - a.rank);
   cache.setSources(uniqueSourcesWithTarget);
 
-  const options: RunnerOptions = {
-    media,
-    events: {
-      init(e) {
-        cache.setStatus(e.sourceIds.map((id) => ({ id, status: Status.WAITING })));
-        void makeResponseEmbed(cache, interaction);
-      },
-      start(e) {
-        const status = cache.getStatus();
-        if (!status) return;
-        const sourceStatus = status.find((s) => s.id === e);
-        if (!sourceStatus) return;
-        sourceStatus.status = Status.LOADING;
+  cache.setStatus(uniqueSourcesWithTarget.map((s) => ({ id: s.id, status: Status.WAITING })));
+  await makeResponseEmbed(cache, interaction);
 
-        cache.setStatus(status);
-        void makeResponseEmbed(cache, interaction);
-      },
-      update(e) {
-        const status = cache.getStatus();
-        if (!status) return;
-        const sourceStatus = status.find((s) => s.id === e.id);
-        if (!sourceStatus) return;
+  const allSources = providers.listSources();
+  const sourceResults = [];
+  const embedResults = [];
 
-        const statusMap = {
-          success: Status.SUCCESS,
-          failure: Status.FAILURE,
-          notfound: Status.FAILURE,
-          pending: Status.LOADING,
-        };
+  for (const source of allSources) {
+    const status = cache.getStatus();
+    if (!status) return;
+    const sourceStatus = status.find((s) => s.id === source.id);
+    if (!sourceStatus) return;
+    sourceStatus.status = Status.LOADING;
 
-        sourceStatus.status = statusMap[e.status];
+    cache.setStatus(status);
+    await makeResponseEmbed(cache, interaction);
 
-        cache.setStatus(status);
-        void makeResponseEmbed(cache, interaction);
-      },
-    },
-  };
+    const sourceResult = await providers
+      .runSourceScraper({
+        id: source.id,
+        media,
+      })
+      .catch(() => undefined);
 
-  const results = await providers.runAll(options);
+    if (sourceResult) {
+      sourceResults.push(sourceResult);
+      sourceStatus.status = Status.SUCCESS;
+
+      for (const embed of sourceResult.embeds) {
+        const embedResult = await providers
+          .runEmbedScraper({
+            id: embed.embedId,
+            url: embed.url,
+          })
+          .catch(() => undefined);
+
+        if (embedResult) {
+          embedResults.push(embedResult);
+        } else {
+          sourceStatus.status = Status.FAILURE;
+        }
+      }
+    } else {
+      sourceStatus.status = Status.FAILURE;
+    }
+
+    cache.setStatus(status);
+    await makeResponseEmbed(cache, interaction);
+  }
+
+  const results = sourceResults.length > 0 || embedResults.length > 0;
   const status = cache.getStatus();
 
   if (results) {
@@ -184,7 +196,8 @@ export async function checkAvailability(
     cache.setStatus(status);
   }
 
-  await makeResponseEmbed(cache, interaction, Boolean(results));
+  const numberOfSuccesses = status?.filter((s) => s.status === Status.SUCCESS).length ?? 0;
+  await makeResponseEmbed(cache, interaction, Boolean(results), numberOfSuccesses);
 }
 
 export function transformSearchResultToScrapeMedia(
@@ -245,6 +258,7 @@ async function makeResponseEmbed(
   cache: CacheCollection,
   interaction: CommandInteraction,
   success?: boolean,
+  numberOfSuccesses?: number,
 ): Promise<void> {
   const sources = cache.getSources();
   const media = cache.getMedia();
@@ -285,7 +299,11 @@ async function makeResponseEmbed(
     ...(success !== undefined
       ? {
           footer: {
-            text: `${success ? '✅ | found media' : '❌ | no media found'}`,
+            text: `${
+              success
+                ? `✅ found ${numberOfSuccesses} video${numberOfSuccesses === 1 ? '' : 's'}`
+                : `❌ found ${numberOfSuccesses} videos`
+            }`,
           },
         }
       : {}),
