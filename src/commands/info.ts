@@ -2,7 +2,6 @@ import { Command } from '@sapphire/framework';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, CommandInteraction } from 'discord.js';
 
 import pkg from '#package.json' assert { type: 'json' };
-import { config } from '#src/config';
 import { isRealError } from '#src/util';
 
 export class InfoCommand extends Command {
@@ -14,7 +13,7 @@ export class InfoCommand extends Command {
         title: 'mw-bot info',
         description: `mw-bot v${pkg.version}`,
         thumbnail: {
-          url: this.container.client.user?.displayAvatarURL() ?? config.mwIconUrl,
+          url: this.container.client.user!.displayAvatarURL(),
         },
         color: 0xa87fd1,
       };

@@ -1,7 +1,7 @@
 import { Command } from '@sapphire/framework';
 import { CommandInteraction } from 'discord.js';
 
-import { config, mwUrls } from '#src/config';
+import { mwUrls } from '#src/config';
 import { isRealError } from '#src/util';
 
 export class StatusCommand extends Command {
@@ -21,7 +21,7 @@ export class StatusCommand extends Command {
           title: 'mw status',
           description,
           thumbnail: {
-            url: this.container.client.user?.displayAvatarURL() ?? config.mwIconUrl,
+            url: this.container.client.user!.displayAvatarURL(),
           },
           color: 0xa87fd1,
         },

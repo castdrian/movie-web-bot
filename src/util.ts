@@ -23,25 +23,9 @@ import {
 import { Counter } from 'prom-client';
 import { MovieDetails, TMDB, TvShowDetails } from 'tmdb-ts';
 
-import { Status, TagStore, TagUrlButtonData, config, statusEmojiIds, tagCache, validateTags } from '#src/config';
-import { parseToml } from '#src/toml';
+import { Status, TagUrlButtonData, config, statusEmojiIds } from '#src/config';
 
 const tmdb = new TMDB(config.tmdbApiKey);
-
-export async function updateCacheFromRemote() {
-  const res = await fetch(config.tagRefreshUrl)
-    .then((x) => x.text())
-    .catch(() => null);
-
-  if (!res) return;
-
-  const tagStore = parseToml<TagStore>(res);
-  validateTags(tagStore);
-
-  for (const [key, tag] of Object.entries(tagStore)) {
-    tagCache.set(key, tag);
-  }
-}
 
 export async function searchTitle(query: string): Promise<ApplicationCommandOptionChoiceData[]> {
   try {
@@ -241,7 +225,7 @@ async function makeResponseEmbed(
     },
     author: {
       name: `movie-web`,
-      icon_url: interaction.client.user?.displayAvatarURL() ?? config.mwIconUrl,
+      icon_url: interaction.client.user?.displayAvatarURL(),
     },
     url: `https://movie-web.app/media/tmdb-${media.type}-${media.tmdbId}`,
     timestamp: new Date().toISOString(),
