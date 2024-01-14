@@ -1,4 +1,4 @@
-import { ProviderControls, RunnerOptions, ScrapeMedia, Targets, targets } from '@movie-web/providers';
+import { RunnerOptions, ScrapeMedia, Targets, makeProviders, makeStandardFetcher, targets } from '@movie-web/providers';
 import {
   IChatInputCommandPayload,
   IContextMenuCommandPayload,
@@ -76,16 +76,10 @@ export async function fetchMedia(
   }
 }
 
-export interface Providers {
-  providers: ProviderControls;
-  target: Targets;
-}
-
 export async function checkAvailability(
   media: ScrapeMedia,
   posterPath: string,
   interaction: CommandInteraction,
-  providers: Providers[],
 ): Promise<void> {
   const cache = new CacheCollection();
 
@@ -99,24 +93,36 @@ export async function checkAvailability(
     [targets.NATIVE]: 3,
   };
 
-  const sourceTargetMap: Map<string, { id: string; target: Targets }> = new Map();
+  const sourceTargetMap: Map<string, Source> = new Map();
 
-  for (const provider of providers) {
-    const sources = provider.providers.listSources();
+  const providers = makeProviders({
+    fetcher: makeStandardFetcher(fetch),
+    target: targets.ANY,
+  });
+
+  const allTargets = [targets.BROWSER, targets.BROWSER_EXTENSION, targets.NATIVE];
+
+  for (const target of allTargets) {
+    const targetProviders = makeProviders({
+      fetcher: makeStandardFetcher(fetch),
+      target,
+    });
+
+    const sources = targetProviders.listSources();
 
     for (const source of sources) {
-      const currentTargetPriority = targetPriority[provider.target];
+      const currentTargetPriority = targetPriority[target];
       const existingTargetPriority = sourceTargetMap.has(source.id)
-        ? targetPriority[sourceTargetMap.get(source.id)!.target]
+        ? targetPriority[sourceTargetMap.get(source.id)?.target ?? targets.ANY]
         : Infinity;
 
       if (currentTargetPriority < existingTargetPriority) {
-        sourceTargetMap.set(source.id, { id: source.id, target: provider.target });
+        sourceTargetMap.set(source.id, { id: source.id, target, rank: source.rank });
       }
     }
   }
 
-  const uniqueSourcesWithTarget = Array.from(sourceTargetMap.values());
+  const uniqueSourcesWithTarget = Array.from(sourceTargetMap.values()).sort((a, b) => b.rank - a.rank);
   cache.setSources(uniqueSourcesWithTarget);
 
   const options: RunnerOptions = {
@@ -157,30 +163,28 @@ export async function checkAvailability(
     },
   };
 
-  for (const targetProviders of providers) {
-    const results = await targetProviders.providers.runAll(options);
-    const status = cache.getStatus();
+  const results = await providers.runAll(options);
+  const status = cache.getStatus();
 
-    if (results) {
-      const actionRow = new ActionRowBuilder<ButtonBuilder>().setComponents(
-        new ButtonBuilder()
-          .setLabel('watch on movie-web')
-          .setStyle(ButtonStyle.Link)
-          .setURL(`https://movie-web.app/media/tmdb-${media.type}-${media.tmdbId}`),
-      );
+  if (results) {
+    const actionRow = new ActionRowBuilder<ButtonBuilder>().setComponents(
+      new ButtonBuilder()
+        .setLabel('watch on movie-web')
+        .setStyle(ButtonStyle.Link)
+        .setURL(`https://movie-web.app/media/tmdb-${media.type}-${media.tmdbId}`),
+    );
 
-      await interaction.editReply({ components: [actionRow] });
-    }
-
-    if (status) {
-      status.forEach((s) => {
-        if (s.status === Status.LOADING) s.status = Status.SUCCESS;
-      });
-      cache.setStatus(status);
-    }
-
-    await makeResponseEmbed(cache, interaction, Boolean(results));
+    await interaction.editReply({ components: [actionRow] });
   }
+
+  if (status) {
+    status.forEach((s) => {
+      if (s.status === Status.LOADING) s.status = Status.SUCCESS;
+    });
+    cache.setStatus(status);
+  }
+
+  await makeResponseEmbed(cache, interaction, Boolean(results));
 }
 
 export function transformSearchResultToScrapeMedia(
@@ -224,6 +228,7 @@ export function transformSearchResultToScrapeMedia(
 interface Source {
   id: string;
   target: Targets;
+  rank: number;
 }
 
 function makeSourceString(source: Source, status: Status, client: Client): string {
@@ -233,7 +238,7 @@ function makeSourceString(source: Source, status: Status, client: Client): strin
   };
 
   const specialTarget = Object.entries(targetMap).find(([key]) => key === source.target)?.[1];
-  return `${getStatusEmote(status, client)} \`${source.id}\`${specialTarget ? specialTarget : ''}`;
+  return `${getStatusEmote(status, client)} \`${source.id}\`${specialTarget ? ` ${specialTarget}` : ''}`;
 }
 
 async function makeResponseEmbed(

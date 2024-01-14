@@ -1,15 +1,7 @@
-import { makeProviders, makeStandardFetcher, targets } from '@movie-web/providers';
 import { Command } from '@sapphire/framework';
 import { AutocompleteInteraction, CommandInteraction } from 'discord.js';
 
-import {
-  Providers,
-  checkAvailability,
-  fetchMedia,
-  isRealError,
-  searchTitle,
-  transformSearchResultToScrapeMedia,
-} from '#src/util';
+import { checkAvailability, fetchMedia, isRealError, searchTitle, transformSearchResultToScrapeMedia } from '#src/util';
 
 export class AvailableCommand extends Command {
   public override async chatInputRun(interaction: CommandInteraction) {
@@ -36,18 +28,7 @@ export class AvailableCommand extends Command {
 
       const scrapeMedia = transformSearchResultToScrapeMedia(type, result, season, episode);
 
-      const targetValues = Object.values(targets).filter((target) => target !== targets.ANY);
-      const providers: Providers[] = [];
-
-      for (const target of targetValues) {
-        const targetProviders = makeProviders({
-          fetcher: makeStandardFetcher(fetch),
-          target,
-        });
-        providers.push({ target, providers: targetProviders });
-      }
-
-      await checkAvailability(scrapeMedia, result.poster_path ?? '', interaction, providers);
+      await checkAvailability(scrapeMedia, result.poster_path ?? '', interaction);
     } catch (ex) {
       if (isRealError(ex as Error)) {
         throw ex;
