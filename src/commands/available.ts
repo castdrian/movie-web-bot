@@ -28,13 +28,12 @@ export class AvailableCommand extends Command {
 
       const scrapeMedia = transformSearchResultToScrapeMedia(type, result, season, episode);
 
-      await checkAvailability(scrapeMedia, result.poster_path ?? '', interaction);
+      return checkAvailability(scrapeMedia, result.poster_path ?? '', interaction);
     } catch (ex) {
       if (isRealError(ex as Error)) {
         throw ex;
       }
     }
-    return undefined;
   }
 
   public override async autocompleteRun(interaction: AutocompleteInteraction) {
