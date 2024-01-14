@@ -203,7 +203,7 @@ export async function checkAvailability(
   }
 
   const numberOfSuccesses = status?.filter((s) => s.status === Status.SUCCESS).length ?? 0;
-  await makeResponseEmbed(cache, interaction, Boolean(results), numberOfSuccesses);
+  await makeResponseEmbed(cache, interaction, results, numberOfSuccesses);
 }
 
 export function transformSearchResultToScrapeMedia(
