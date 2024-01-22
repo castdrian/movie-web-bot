@@ -98,6 +98,7 @@ export async function checkAvailability(
   const providers = makeProviders({
     fetcher: makeStandardFetcher(fetch),
     target: targets.ANY,
+    consistentIpForRequests: true,
   });
 
   const allTargets = [targets.BROWSER, targets.BROWSER_EXTENSION, targets.NATIVE];
@@ -106,6 +107,7 @@ export async function checkAvailability(
     const targetProviders = makeProviders({
       fetcher: makeStandardFetcher(fetch),
       target,
+      consistentIpForRequests: true,
     });
 
     const sources = targetProviders.listSources();
