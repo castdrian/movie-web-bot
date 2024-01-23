@@ -1,4 +1,12 @@
-import { ScrapeMedia, Targets, makeProviders, makeStandardFetcher, targets } from '@movie-web/providers';
+import {
+  ScrapeMedia,
+  SourcererOptions,
+  flags,
+  getBuiltinSources,
+  makeProviders,
+  makeStandardFetcher,
+  targets,
+} from '@movie-web/providers';
 import {
   IChatInputCommandPayload,
   IContextMenuCommandPayload,
@@ -86,14 +94,7 @@ export async function checkAvailability(
   cache.setMedia(media);
   cache.setPosterPath(posterPath);
 
-  const targetPriority = {
-    [targets.ANY]: NaN,
-    [targets.BROWSER]: 1,
-    [targets.BROWSER_EXTENSION]: 2,
-    [targets.NATIVE]: 3,
-  };
-
-  const sourceTargetMap: Map<string, Source> = new Map();
+  const sourceTypeMap: Map<string, Source> = new Map();
 
   const providers = makeProviders({
     fetcher: makeStandardFetcher(fetch),
@@ -101,33 +102,17 @@ export async function checkAvailability(
     consistentIpForRequests: true,
   });
 
-  const allTargets = [targets.BROWSER, targets.BROWSER_EXTENSION, targets.NATIVE];
+  const sources = getBuiltinSources();
 
-  for (const target of allTargets) {
-    const targetProviders = makeProviders({
-      fetcher: makeStandardFetcher(fetch),
-      target,
-      consistentIpForRequests: true,
-    });
-
-    const sources = targetProviders.listSources();
-
-    for (const source of sources) {
-      const currentTargetPriority = targetPriority[target];
-      const existingTargetPriority = sourceTargetMap.has(source.id)
-        ? targetPriority[sourceTargetMap.get(source.id)?.target ?? targets.ANY]
-        : Infinity;
-
-      if (currentTargetPriority < existingTargetPriority) {
-        sourceTargetMap.set(source.id, { id: source.id, target, rank: source.rank });
-      }
-    }
+  for (const source of sources) {
+    const sourceType = determineSourceType(source);
+    sourceTypeMap.set(source.id, { id: source.id, type: sourceType, rank: source.rank });
   }
 
-  const uniqueSourcesWithTarget = Array.from(sourceTargetMap.values()).sort((a, b) => b.rank - a.rank);
-  cache.setSources(uniqueSourcesWithTarget);
+  const sortedSourcesWithType = Array.from(sourceTypeMap.values()).sort((a, b) => b.rank - a.rank);
+  cache.setSources(sortedSourcesWithType);
 
-  cache.setStatus(uniqueSourcesWithTarget.map((s) => ({ id: s.id, status: Status.WAITING })));
+  cache.setStatus(sortedSourcesWithType.map((s) => ({ id: s.id, status: Status.WAITING })));
   await makeResponseEmbed(cache, interaction);
 
   const allSources = providers.listSources();
@@ -208,6 +193,20 @@ export async function checkAvailability(
   await makeResponseEmbed(cache, interaction, results, numberOfSuccesses);
 }
 
+function determineSourceType(options: SourcererOptions): SourceType | null {
+  let sourceType: SourceType | null = null;
+
+  if (options.flags.includes(flags.CF_BLOCKED)) {
+    sourceType = SourceType.CUSTOM_PROXY;
+  }
+
+  if (!options.flags.includes(flags.CORS_ALLOWED) || options.flags.includes(flags.IP_LOCKED)) {
+    sourceType = SourceType.EXTENSION;
+  }
+
+  return sourceType;
+}
+
 export function transformSearchResultToScrapeMedia(
   type: 'tv' | 'movie',
   result: TvShowDetails | MovieDetails,
@@ -248,18 +247,12 @@ export function transformSearchResultToScrapeMedia(
 
 interface Source {
   id: string;
-  target: Targets;
+  type: SourceType | null;
   rank: number;
 }
 
 function makeSourceString(source: Source, status: Status, client: Client): string {
-  const targetMap = {
-    [targets.BROWSER_EXTENSION]: SourceType.EXTENSION,
-    [targets.NATIVE]: SourceType.NATIVE,
-  };
-
-  const specialTarget = Object.entries(targetMap).find(([key]) => key === source.target)?.[1];
-  return `${getStatusEmote(status, client)} \`${source.id}\`${specialTarget ? ` ${specialTarget}` : ''}`;
+  return `${getStatusEmote(status, client)} \`${source.id}\`${source.type ? ` ${source.type}` : ''}`;
 }
 
 async function makeResponseEmbed(
