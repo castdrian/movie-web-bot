@@ -1,4 +1,12 @@
-import { RunnerOptions, ScrapeMedia, makeProviders, makeStandardFetcher, targets } from '@movie-web/providers';
+import {
+  ScrapeMedia,
+  SourcererOptions,
+  flags,
+  getBuiltinSources,
+  makeProviders,
+  makeStandardFetcher,
+  targets,
+} from '@movie-web/providers';
 import {
   IChatInputCommandPayload,
   IContextMenuCommandPayload,
@@ -23,25 +31,9 @@ import {
 import { Counter } from 'prom-client';
 import { MovieDetails, TMDB, TvShowDetails } from 'tmdb-ts';
 
-import { Status, TagStore, TagUrlButtonData, config, statusEmojiIds, tagCache, validateTags } from '#src/config';
-import { parseToml } from '#src/toml';
+import { SourceType, Status, TagUrlButtonData, config, statusEmojiIds } from '#src/config';
 
 const tmdb = new TMDB(config.tmdbApiKey);
-
-export async function updateCacheFromRemote() {
-  const res = await fetch(config.tagRefreshUrl)
-    .then((x) => x.text())
-    .catch(() => null);
-
-  if (!res) return;
-
-  const tagStore = parseToml<TagStore>(res);
-  validateTags(tagStore);
-
-  for (const [key, tag] of Object.entries(tagStore)) {
-    tagCache.set(key, tag);
-  }
-}
 
 export async function searchTitle(query: string): Promise<ApplicationCommandOptionChoiceData[]> {
   try {
@@ -97,52 +89,86 @@ export async function checkAvailability(
   posterPath: string,
   interaction: CommandInteraction,
 ): Promise<void> {
-  const providers = makeProviders({ fetcher: makeStandardFetcher(fetch), target: targets.BROWSER });
   const cache = new CacheCollection();
 
   cache.setMedia(media);
   cache.setPosterPath(posterPath);
 
-  const options: RunnerOptions = {
-    media,
-    events: {
-      init(e) {
-        cache.setSources(e.sourceIds);
-        cache.setStatus(e.sourceIds.map((id) => ({ id, status: Status.WAITING })));
-        void makeResponseEmbed(cache, interaction);
-      },
-      start(e) {
-        const status = cache.getStatus();
-        if (!status) return;
-        const sourceStatus = status.find((s) => s.id === e);
-        if (!sourceStatus) return;
-        sourceStatus.status = Status.LOADING;
+  const sourceTypeMap: Map<string, Source> = new Map();
 
-        cache.setStatus(status);
-        void makeResponseEmbed(cache, interaction);
-      },
-      update(e) {
-        const status = cache.getStatus();
-        if (!status) return;
-        const sourceStatus = status.find((s) => s.id === e.id);
-        if (!sourceStatus) return;
+  const providers = makeProviders({
+    fetcher: makeStandardFetcher(fetch),
+    target: targets.ANY,
+    consistentIpForRequests: true,
+  });
 
-        const statusMap = {
-          success: Status.SUCCESS,
-          failure: Status.FAILURE,
-          notfound: Status.FAILURE,
-          pending: Status.LOADING,
-        };
+  const sources = getBuiltinSources();
 
-        sourceStatus.status = statusMap[e.status];
+  for (const source of sources) {
+    const sourceType = determineSourceType(source);
+    sourceTypeMap.set(source.id, { id: source.id, type: sourceType, rank: source.rank });
+  }
 
-        cache.setStatus(status);
-        void makeResponseEmbed(cache, interaction);
-      },
-    },
-  };
+  const sortedSourcesWithType = Array.from(sourceTypeMap.values()).sort((a, b) => b.rank - a.rank);
+  cache.setSources(sortedSourcesWithType);
 
-  const results = await providers.runAll(options);
+  cache.setStatus(sortedSourcesWithType.map((s) => ({ id: s.id, status: Status.WAITING })));
+  await makeResponseEmbed(cache, interaction);
+
+  const allSources = providers.listSources();
+  const sourceResults = [];
+  const embedResults = [];
+
+  for (const source of allSources) {
+    const status = cache.getStatus();
+    if (!status) return;
+    const sourceStatus = status.find((s) => s.id === source.id);
+    if (!sourceStatus) return;
+    sourceStatus.status = Status.LOADING;
+
+    cache.setStatus(status);
+    await makeResponseEmbed(cache, interaction);
+
+    const timeoutPromise = timeout(10000).then(() => undefined);
+
+    const sourceResultPromise = providers
+      .runSourceScraper({
+        id: source.id,
+        media,
+      })
+      .catch(() => undefined);
+
+    const sourceResult = await Promise.race([sourceResultPromise, timeoutPromise]);
+
+    if (sourceResult) {
+      sourceResults.push(sourceResult);
+      sourceStatus.status = Status.SUCCESS;
+
+      for (const embed of sourceResult.embeds) {
+        const embedResultPromise = providers
+          .runEmbedScraper({
+            id: embed.embedId,
+            url: embed.url,
+          })
+          .catch(() => undefined);
+
+        const embedResult = await Promise.race([embedResultPromise, timeoutPromise]);
+
+        if (embedResult) {
+          embedResults.push(embedResult);
+        } else {
+          sourceStatus.status = Status.FAILURE;
+        }
+      }
+    } else {
+      sourceStatus.status = Status.FAILURE;
+    }
+
+    cache.setStatus(status);
+    await makeResponseEmbed(cache, interaction);
+  }
+
+  const results = sourceResults.length > 0 || embedResults.length > 0;
   const status = cache.getStatus();
 
   if (results) {
@@ -163,7 +189,22 @@ export async function checkAvailability(
     cache.setStatus(status);
   }
 
-  await makeResponseEmbed(cache, interaction, Boolean(results));
+  const numberOfSuccesses = status?.filter((s) => s.status === Status.SUCCESS).length ?? 0;
+  await makeResponseEmbed(cache, interaction, results, numberOfSuccesses);
+}
+
+function determineSourceType(options: SourcererOptions): SourceType | null {
+  let sourceType: SourceType | null = null;
+
+  if (options.flags.includes(flags.CF_BLOCKED)) {
+    sourceType = SourceType.CUSTOM_PROXY;
+  }
+
+  if (!options.flags.includes(flags.CORS_ALLOWED) || options.flags.includes(flags.IP_LOCKED)) {
+    sourceType = SourceType.EXTENSION;
+  }
+
+  return sourceType;
 }
 
 export function transformSearchResultToScrapeMedia(
@@ -204,10 +245,21 @@ export function transformSearchResultToScrapeMedia(
   throw new Error('Invalid type parameter');
 }
 
+interface Source {
+  id: string;
+  type: SourceType | null;
+  rank: number;
+}
+
+function makeSourceString(source: Source, status: Status, client: Client): string {
+  return `${getStatusEmote(status, client)} \`${source.id}\`${source.type ? ` ${source.type}` : ''}`;
+}
+
 async function makeResponseEmbed(
   cache: CacheCollection,
   interaction: CommandInteraction,
   success?: boolean,
+  numberOfSuccesses?: number,
 ): Promise<void> {
   const sources = cache.getSources();
   const media = cache.getMedia();
@@ -226,29 +278,33 @@ async function makeResponseEmbed(
 
   const description = sources
     .map((source) => {
-      const sourceStatus = status.find((s) => s.id === source);
+      const sourceStatus = status.find((s) => s.id === source.id);
       if (!sourceStatus) return undefined;
-      return `${getStatusEmote(sourceStatus.status, interaction.client)} \`${source}\``;
+      return makeSourceString(source, sourceStatus.status, interaction.client);
     })
     .join('\n');
 
   const embed = {
     title,
-    description,
+    description: `${description}\n\n${SourceType.CUSTOM_PROXY} source requires a [custom proxy](<https://docs.movie-web.app/proxy/deploy>) or below\n${SourceType.EXTENSION} source requires the [browser extension](<https://github.com/movie-web/extension/releases/latest>) or below\n${SourceType.NATIVE} source requires the [native app](<https://github.com/movie-web/native-app/releases/latest>)`,
     color: 0xa87fd1,
     thumbnail: {
       url: getMediaPoster(cache.getPosterPath()!),
     },
     author: {
       name: `movie-web`,
-      icon_url: interaction.client.user?.displayAvatarURL() ?? config.mwIconUrl,
+      icon_url: interaction.client.user?.displayAvatarURL(),
     },
     url: `https://movie-web.app/media/tmdb-${media.type}-${media.tmdbId}`,
     timestamp: new Date().toISOString(),
     ...(success !== undefined
       ? {
           footer: {
-            text: `${success ? '✅ | found media' : '❌ | no media found'}`,
+            text: `${
+              success
+                ? `✅ found ${numberOfSuccesses} video${numberOfSuccesses === 1 ? '' : 's'}`
+                : `❌ found ${numberOfSuccesses} videos`
+            }`,
           },
         }
       : {}),
@@ -271,12 +327,12 @@ function getStatusEmote(status: Status, client: Client): GuildEmoji {
 }
 
 class CacheCollection extends Collection<string, any> {
-  public setSources(value: string[]) {
+  public setSources(value: Source[]) {
     this.set('sources', value);
   }
 
-  public getSources(): string[] | undefined {
-    return this.get('sources') as string[] | undefined;
+  public getSources(): Source[] | undefined {
+    return this.get('sources') as Source[] | undefined;
   }
 
   public getStatus(): ProviderStatus[] | undefined {
@@ -364,4 +420,10 @@ export function constructTagButtons(
 
   actionRows.push(actionRow);
   return actionRows;
+}
+
+function timeout(ms: number) {
+  return new Promise((_, reject) => {
+    setTimeout(() => reject(new Error('timeout')), ms);
+  });
 }

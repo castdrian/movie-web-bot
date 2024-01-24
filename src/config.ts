@@ -11,16 +11,18 @@ const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 const schema = z.object({
   discordToken: z.string().min(1),
-  guildId: z.string().min(17),
+  guildId: z.string().regex(/^(?<id>\d{17,20})$/),
   tmdbApiKey: z.string().min(1),
-  tagRefreshUrl: z
-    .string()
-    .min(1)
-    .default('https://raw.githubusercontent.com/movie-web/discord-bot/master/src/tags.toml'),
   mwIconUrl: z.string().min(1).default('https://movie-web.app/android-chrome-512x512.png'),
 });
 
 const prefix = 'CONF_';
+
+export enum SourceType {
+  CUSTOM_PROXY = 'ᵖʳᵒˣʸ',
+  EXTENSION = 'ᵉˣᵗ',
+  NATIVE = 'ᵃᵖᵖ',
+}
 
 export enum Status {
   WAITING,
