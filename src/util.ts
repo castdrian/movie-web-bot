@@ -138,7 +138,7 @@ export async function checkAvailability(
       })
       .catch(() => undefined);
 
-    const sourceResult = await Promise.race([sourceResultPromise, timeoutPromise]);
+    const sourceResult = await Promise.race([sourceResultPromise, timeoutPromise]).catch(() => undefined);
 
     if (sourceResult) {
       sourceResults.push(sourceResult);
@@ -152,7 +152,7 @@ export async function checkAvailability(
           })
           .catch(() => undefined);
 
-        const embedResult = await Promise.race([embedResultPromise, timeoutPromise]);
+        const embedResult = await Promise.race([embedResultPromise, timeoutPromise]).catch(() => undefined);
 
         if (embedResult) {
           embedResults.push(embedResult);
