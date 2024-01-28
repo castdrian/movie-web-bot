@@ -179,7 +179,7 @@ export async function checkAvailability(
 
   const numberOfSuccesses = status?.filter((s) => s.status === Status.SUCCESS).length ?? 0;
 
-  if (!!numberOfSuccesses) {
+  if (numberOfSuccesses > 0) {
     const actionRow = new ActionRowBuilder<ButtonBuilder>().setComponents(
       new ButtonBuilder()
         .setLabel('watch on movie-web')
@@ -190,7 +190,7 @@ export async function checkAvailability(
     await interaction.editReply({ components: [actionRow] });
   }
 
-  await makeResponseEmbed(cache, interaction, !!numberOfSuccesses, numberOfSuccesses);
+  await makeResponseEmbed(cache, interaction, numberOfSuccesses > 0, numberOfSuccesses);
 }
 
 function determineSourceType(options: SourcererOptions): SourceType | null {
