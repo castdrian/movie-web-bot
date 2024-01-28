@@ -138,7 +138,7 @@ export async function checkAvailability(
       })
       .catch(() => undefined);
 
-    const sourceResult = await Promise.race([sourceResultPromise, timeoutPromise]);
+    const sourceResult = await Promise.race([sourceResultPromise, timeoutPromise]).catch(() => undefined);
 
     if (sourceResult) {
       sourceResults.push(sourceResult);
@@ -152,7 +152,7 @@ export async function checkAvailability(
           })
           .catch(() => undefined);
 
-        const embedResult = await Promise.race([embedResultPromise, timeoutPromise]);
+        const embedResult = await Promise.race([embedResultPromise, timeoutPromise]).catch(() => undefined);
 
         if (embedResult) {
           embedResults.push(embedResult);
@@ -168,10 +168,18 @@ export async function checkAvailability(
     await makeResponseEmbed(cache, interaction);
   }
 
-  const results = sourceResults.length > 0 || embedResults.length > 0;
   const status = cache.getStatus();
 
-  if (results) {
+  if (status) {
+    status.forEach((s) => {
+      if (s.status === Status.LOADING) s.status = Status.SUCCESS;
+    });
+    cache.setStatus(status);
+  }
+
+  const numberOfSuccesses = status?.filter((s) => s.status === Status.SUCCESS).length ?? 0;
+
+  if (numberOfSuccesses > 0) {
     const actionRow = new ActionRowBuilder<ButtonBuilder>().setComponents(
       new ButtonBuilder()
         .setLabel('watch on movie-web')
@@ -182,15 +190,7 @@ export async function checkAvailability(
     await interaction.editReply({ components: [actionRow] });
   }
 
-  if (status) {
-    status.forEach((s) => {
-      if (s.status === Status.LOADING) s.status = Status.SUCCESS;
-    });
-    cache.setStatus(status);
-  }
-
-  const numberOfSuccesses = status?.filter((s) => s.status === Status.SUCCESS).length ?? 0;
-  await makeResponseEmbed(cache, interaction, results, numberOfSuccesses);
+  await makeResponseEmbed(cache, interaction, numberOfSuccesses > 0, numberOfSuccesses);
 }
 
 function determineSourceType(options: SourcererOptions): SourceType | null {
