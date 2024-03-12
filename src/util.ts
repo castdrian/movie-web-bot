@@ -31,7 +31,7 @@ import {
 import { Counter } from 'prom-client';
 import { MovieDetails, TMDB, TvShowDetails } from 'tmdb-ts';
 
-import { SourceType, Status, TagUrlButtonData, config, statusEmojiIds } from '#src/config';
+import { SourceType, Status, TagUrlButtonData, config, mwUrls, statusEmojiIds } from '#src/config';
 
 const tmdb = new TMDB(config.tmdbApiKey);
 
@@ -180,14 +180,69 @@ export async function checkAvailability(
   const numberOfSuccesses = status?.filter((s) => s.status === Status.SUCCESS).length ?? 0;
 
   if (numberOfSuccesses > 0) {
+    interface Embed {
+      title?: string;
+      description: string;
+      thumbnail?: {
+        url: string;
+      };
+      color: number;
+    }
+
     const actionRow = new ActionRowBuilder<ButtonBuilder>().setComponents(
       new ButtonBuilder()
-        .setLabel('watch on movie-web')
-        .setStyle(ButtonStyle.Link)
-        .setURL(`https://movie-web.app/media/tmdb-${media.type}-${media.tmdbId}`),
+        .setLabel('🎞️ Watch on movie-web')
+        .setStyle(ButtonStyle.Secondary)
+        .setCustomId('watch_on_movie_web'),
     );
 
+    const urlStatuses = await Promise.all(
+      mwUrls.map(async (url) => {
+        if (url.trim() === 'https://movie-web.x') {
+          return { url, isUp: true };
+        }
+        const { ok } = await fetch(url).catch(() => ({ ok: false }));
+        return { url, isUp: ok };
+      }),
+    );
+    const description = `**Here are the following places available to watch \`\`${media.title}\`\` **:\n\n${urlStatuses
+      .filter(({ isUp }) => isUp)
+      .map(({ url }) => `- [${url.split('//')[1]}](${url}/media/tmdb-${media.type}-${media.tmdbId})`)
+      .join('\n')}`;
+    const embed: Embed = {
+      title: '🎞️ Watch on movie-web',
+      description,
+      color: 0xa87fd1,
+    };
+    const warn: Embed = {
+      title: undefined,
+      description: `Please note that the [**movie-web.x**](https://movie-web.x/) is only accessible using Brave, Opera or installing an [**extension**](https://unstoppabledomains.com/extension) to resolve unstoppable domains. If you cannot access [**movie-web.x**](https://movie-web.x/) try using a gateway: [**Cloudflare**](https://cloudflare-ipfs.com/ipns/k51qzi5uqu5diql6nkzokwdvz9511dp9itillc7xhixptq14tk1oz8agh3wrjd), [**dweb.link**](https://k51qzi5uqu5diql6nkzokwdvz9511dp9itillc7xhixptq14tk1oz8agh3wrjd.ipns.dweb.link/), or [**cf-ipfs**](https://k51qzi5uqu5diql6nkzokwdvz9511dp9itillc7xhixptq14tk1oz8agh3wrjd.ipns.cf-ipfs.com/).`,
+      color: 0xffbf00,
+    };
     await interaction.editReply({ components: [actionRow] });
+    const filter = (i: { customId: string }) => i.customId === 'watch_on_movie_web';
+    if (interaction.channel) {
+      const collector = interaction.channel.createMessageComponentCollector({ filter, time: 60000 });
+      collector.on('collect', async (i) => {
+        collector.stop();
+        if (i.customId === 'watch_on_movie_web') {
+          const embedsToSend = [embed];
+          if (mwUrls.includes('https://movie-web.x')) {
+            embedsToSend.push(warn);
+          }
+
+          const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder()
+              .setLabel('Instance Info')
+              .setEmoji('ℹ️')
+              .setStyle(ButtonStyle.Link)
+              .setURL('https://movie-web.github.io/docs/instances#community-instances'),
+          );
+
+          await i.reply({ embeds: embedsToSend, components: [row], ephemeral: true });
+        }
+      });
+    }
   }
 
   await makeResponseEmbed(cache, interaction, numberOfSuccesses > 0, numberOfSuccesses);

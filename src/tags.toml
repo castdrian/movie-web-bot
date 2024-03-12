@@ -90,14 +90,6 @@ The movie you are trying to watch only came out in theatres very recently. We do
 We also won't point you to any other sources, so you're best off going to the actual movie theatre or waiting until it comes out on streaming. Asking for or providing other sources is against the rules and will result in a ban.
 """
 
-[squeezebox]
-isContextEnabled = true
-content = """
-# What is the new domain? Why did the site stop working?
-
-The site has moved to https://movie-web.app. The old domain is no longer functional. It stopped working because we moved to a new domain. Update your bookmarks, tell your friends! Don't ask us restore functionality to the old link, or else 😈
-"""
-
 [showbox]
 isContextEnabled = true
 content = """
@@ -107,4 +99,26 @@ content = """
 Doing so is simple and can be done for free and within 5 minutes, see [here](<https://docs.movie-web.app/proxy/deploy>).
 
 If you need any extra help with setting up a custom proxy, you can ask for help in the [#custom-proxy](<https://discord.com/channels/871713465100816424/1194388816279113798>) channel.
+"""
+
+[shutdown]
+isContextEnabled = true
+content = """
+# FAQ about shutdown
+## Is movie-web dead?
+No. The official hosted instance is gone, but plenty of self-hosted ones are still up! See the next section
+## I'm getting a "Check your internet connection" error message
+The official movie-web.app instance has been taken down, keep reading for alternatives!
+## movie-web.app is still working for me though!
+If you visited movie-web before, you will have a copy of the website saved on your computer. This will not stay in your browser forever and will eventually stop working. 
+## How can I still use movie-web?
+See here: <https://movie-web.github.io/docs/instances>
+## Why not just use a different domain/etc?
+We are not interested in bypassing this, etc. Real identities are linked to the movie-web project as well, so that would be dumb.
+## Was movie-web the only site targeted?
+No. Over 20 other sites were also in this.
+## How can I selfhost?
+See <https://movie-web.github.io/docs/>
+## Where can I find alternatives?
+See <https://fmhy.net/videopiracyguide>
 """
