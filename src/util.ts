@@ -201,8 +201,10 @@ export async function checkAvailability(
         if (url.trim() === 'https://movie-web.x') {
           return { url, isUp: true };
         }
-        const { ok } = await fetch(url).catch(() => ({ ok: false }));
-        return { url, isUp: ok };
+        const response = await fetch(`${url}/ping.txt`).catch(() => null);
+        const text = response ? await response.text() : '';
+        const isUp = text.trim() === 'pong';
+        return { url, isUp };
       }),
     );
     const description = `**Here are the following places available to watch \`\`${media.title}\`\` **:\n\n${urlStatuses

@@ -12,8 +12,10 @@ export class StatusCommand extends Command {
       const filteredMwUrls = mwUrls.filter((url) => url.trim() !== 'https://movie-web.x');
       const description = await Promise.all(
         filteredMwUrls.map(async (url) => {
-          const { ok } = await fetch(url).catch(() => ({ ok: false }));
-          return `**${url}** ${ok ? `🟢 UP` : '🔴 DOWN'}`;
+          const response = await fetch(`${url}/ping.txt`).catch(() => null);
+          const text = response ? await response.text() : '';
+          const ok = text.trim() === 'pong';
+          return `${ok ? '🟢 UP' : '🔴 DOWN'} **${url}**`;
         }),
       ).then((lines) => lines.join('\n'));
 
