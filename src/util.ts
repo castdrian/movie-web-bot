@@ -188,13 +188,12 @@ export async function checkAvailability(
       };
       color: number;
     }
+    const button = new ButtonBuilder()
+      .setLabel('🎞️ Watch on movie-web')
+      .setStyle(ButtonStyle.Secondary)
+      .setCustomId('watch_on_movie_web');
 
-    const actionRow = new ActionRowBuilder<ButtonBuilder>().setComponents(
-      new ButtonBuilder()
-        .setLabel('🎞️ Watch on movie-web')
-        .setStyle(ButtonStyle.Secondary)
-        .setCustomId('watch_on_movie_web'),
-    );
+    const actionRow = new ActionRowBuilder<ButtonBuilder>().setComponents(button);
 
     const urlStatuses = await Promise.all(
       mwUrls.map(async (url) => {
@@ -226,7 +225,6 @@ export async function checkAvailability(
     if (interaction.channel) {
       const collector = interaction.channel.createMessageComponentCollector({ filter, time: 60000 });
       collector.on('collect', async (i) => {
-        collector.stop();
         if (i.customId === 'watch_on_movie_web') {
           const embedsToSend = [embed];
           if (mwUrls.includes('https://movie-web.x')) {
@@ -243,6 +241,10 @@ export async function checkAvailability(
 
           await i.reply({ embeds: embedsToSend, components: [row], ephemeral: true });
         }
+      });
+      collector.on('end', async () => {
+        button.setDisabled(true);
+        await interaction.editReply({ components: [actionRow] });
       });
     }
   }
