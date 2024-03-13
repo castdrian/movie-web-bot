@@ -24,6 +24,7 @@ export class InfoCommand extends Command {
           .setLabel('GitHub')
           .setStyle(ButtonStyle.Link)
           .setURL('https://github.com/movie-web/movie-web'),
+        new ButtonBuilder().setLabel('Docs').setStyle(ButtonStyle.Link).setURL('https://movie-web.github.io/docs/'),
       );
 
       await interaction.editReply({ embeds: [embed], components: [row] });
