@@ -189,15 +189,15 @@ export async function checkAvailability(
 
     const urlStatuses = await Promise.all(
       mwUrls.map(async (url) => {
-        const response = await fetch(`${url}/ping.txt`).catch(() => null);
+        const response = await fetch(`${url.trim()}/ping.txt`).catch(() => null);
         const text = response ? await response.text() : '';
         const isUp = text.trim() === 'pong';
         return { url, isUp };
       }),
     );
-    const description = `**Here are the following places available to watch \`\`${media.title}\`\` **:\n\n${urlStatuses
+    const description = `**Here are the following places available to watch \`${media.title}\`**:\n\n${urlStatuses
       .filter(({ isUp }) => isUp)
-      .map(({ url }) => `- [${url.split('//')[1]}](${url}/media/tmdb-${media.type}-${media.tmdbId})`)
+      .map(({ url }) => `- [${new URL(url).hostname}](${url.trim()}/media/tmdb-${media.type}-${media.tmdbId})`)
       .join('\n')}`;
     const embeds = [
       {
@@ -326,7 +326,7 @@ async function makeResponseEmbed(
 
   const embed = {
     title,
-    description: `${description}\n\n${SourceType.CUSTOM_PROXY} source requires a [custom proxy](<https://docs.movie-web.app/proxy/deploy>) or below\n${SourceType.EXTENSION} source requires the [browser extension](<https://github.com/movie-web/extension/releases/latest>) or below\n${SourceType.NATIVE} source requires the [native app](<https://github.com/movie-web/native-app/releases/latest>)`,
+    description: `${description}\n\n${SourceType.CUSTOM_PROXY} source requires a [custom proxy](<https://movie-web.github.io/docs/proxy/deploy>) or below\n${SourceType.EXTENSION} source requires the [browser extension](<https://github.com/movie-web/extension/releases/latest>) or below\n${SourceType.NATIVE} source requires the [native app](<https://github.com/movie-web/native-app/releases/latest>)`,
     color: 0xa87fd1,
     thumbnail: {
       url: getMediaPoster(cache.getPosterPath()!),
@@ -335,7 +335,6 @@ async function makeResponseEmbed(
       name: `movie-web`,
       icon_url: interaction.client.user?.displayAvatarURL(),
     },
-    url: `https://movie-web.app/media/tmdb-${media.type}-${media.tmdbId}`,
     timestamp: new Date().toISOString(),
     ...(success !== undefined
       ? {

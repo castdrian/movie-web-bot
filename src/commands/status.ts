@@ -11,10 +11,10 @@ export class StatusCommand extends Command {
 
       const description = await Promise.all(
         mwUrls.map(async (url) => {
-          const response = await fetch(`${url}/ping.txt`).catch(() => null);
+          const response = await fetch(`${url.trim()}/ping.txt`).catch(() => null);
           const text = response ? await response.text() : '';
           const ok = text.trim() === 'pong';
-          return `${ok ? '🟢 UP' : '🔴 DOWN'} **${url}**`;
+          return `${ok ? '🟢 UP' : '🔴 DOWN'} **${url.trim()}**`;
         }),
       ).then((lines) => lines.join('\n'));
 
