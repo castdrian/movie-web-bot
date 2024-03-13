@@ -199,11 +199,13 @@ export async function checkAvailability(
       .filter(({ isUp }) => isUp)
       .map(({ url }) => `- [${url.split('//')[1]}](${url}/media/tmdb-${media.type}-${media.tmdbId})`)
       .join('\n')}`;
-    const embeds = {
-      title: '🎞️ Watch on movie-web',
-      description,
-      color: 0xa87fd1,
-    };    
+    const embeds = [
+      {
+        title: '🎞️ Watch on movie-web',
+        description,
+        color: 0xa87fd1,
+      },
+    ];
     await interaction.editReply({ components: [actionRow] });
     const filter = (i: { customId: string }) => i.customId === 'watch_on_movie_web';
     if (interaction.channel) {
