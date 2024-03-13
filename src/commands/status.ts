@@ -9,9 +9,8 @@ export class StatusCommand extends Command {
     try {
       await interaction.deferReply();
 
-      const filteredMwUrls = mwUrls.filter((url) => url.trim() !== 'https://movie-web.x');
       const description = await Promise.all(
-        filteredMwUrls.map(async (url) => {
+        mwUrls.map(async (url) => {
           const response = await fetch(`${url}/ping.txt`).catch(() => null);
           const text = response ? await response.text() : '';
           const ok = text.trim() === 'pong';

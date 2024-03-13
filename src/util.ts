@@ -180,14 +180,6 @@ export async function checkAvailability(
   const numberOfSuccesses = status?.filter((s) => s.status === Status.SUCCESS).length ?? 0;
 
   if (numberOfSuccesses > 0) {
-    interface Embed {
-      title?: string;
-      description: string;
-      thumbnail?: {
-        url: string;
-      };
-      color: number;
-    }
     const button = new ButtonBuilder()
       .setLabel('🎞️ Watch on movie-web')
       .setStyle(ButtonStyle.Secondary)
@@ -197,9 +189,6 @@ export async function checkAvailability(
 
     const urlStatuses = await Promise.all(
       mwUrls.map(async (url) => {
-        if (url.trim() === 'https://movie-web.x') {
-          return { url, isUp: true };
-        }
         const response = await fetch(`${url}/ping.txt`).catch(() => null);
         const text = response ? await response.text() : '';
         const isUp = text.trim() === 'pong';
@@ -210,27 +199,17 @@ export async function checkAvailability(
       .filter(({ isUp }) => isUp)
       .map(({ url }) => `- [${url.split('//')[1]}](${url}/media/tmdb-${media.type}-${media.tmdbId})`)
       .join('\n')}`;
-    const embed: Embed = {
+    const embeds = {
       title: '🎞️ Watch on movie-web',
       description,
       color: 0xa87fd1,
-    };
-    const warn: Embed = {
-      title: undefined,
-      description: `Please note that the [**movie-web.x**](https://movie-web.x/) is only accessible using Brave, Opera or installing an [**extension**](https://unstoppabledomains.com/extension) to resolve unstoppable domains. If you cannot access [**movie-web.x**](https://movie-web.x/) try using a gateway: [**Cloudflare**](https://cloudflare-ipfs.com/ipns/k51qzi5uqu5diql6nkzokwdvz9511dp9itillc7xhixptq14tk1oz8agh3wrjd), [**dweb.link**](https://k51qzi5uqu5diql6nkzokwdvz9511dp9itillc7xhixptq14tk1oz8agh3wrjd.ipns.dweb.link/), or [**cf-ipfs**](https://k51qzi5uqu5diql6nkzokwdvz9511dp9itillc7xhixptq14tk1oz8agh3wrjd.ipns.cf-ipfs.com/).`,
-      color: 0xffbf00,
-    };
+    };    
     await interaction.editReply({ components: [actionRow] });
     const filter = (i: { customId: string }) => i.customId === 'watch_on_movie_web';
     if (interaction.channel) {
       const collector = interaction.channel.createMessageComponentCollector({ filter, time: 60000 });
       collector.on('collect', async (i) => {
         if (i.customId === 'watch_on_movie_web') {
-          const embedsToSend = [embed];
-          if (mwUrls.includes('https://movie-web.x')) {
-            embedsToSend.push(warn);
-          }
-
           const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
               .setLabel('Instance Info')
@@ -239,7 +218,7 @@ export async function checkAvailability(
               .setURL('https://movie-web.github.io/docs/instances#community-instances'),
           );
 
-          await i.reply({ embeds: embedsToSend, components: [row], ephemeral: true });
+          await i.reply({ embeds, components: [row], ephemeral: true });
         }
       });
       collector.on('end', async () => {
