@@ -225,7 +225,14 @@ export async function checkAvailability(
       });
       collector.on('end', async () => {
         button.setDisabled(true);
-        await interaction.editReply({ components: [actionRow] });
+        try {
+          await interaction.editReply({ components: [actionRow] });
+        } catch (error) {
+          if (error instanceof DiscordAPIError && error.code === 10008) {
+            return;
+          }
+          throw error;
+        }
       });
     }
   }
