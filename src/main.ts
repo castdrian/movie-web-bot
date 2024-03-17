@@ -1,3 +1,5 @@
+import './consoleOverride.js';
+
 import { ApplicationCommandRegistries, SapphireClient } from '@sapphire/framework';
 import { GatewayIntentBits } from 'discord.js';
 import fastify from 'fastify';
@@ -18,3 +20,13 @@ const client = new SapphireClient({
 });
 
 await client.login(config.discordToken);
+
+/** ****************************************************************** **/
+// Anti Crash scripts
+process.on('unhandledRejection', (reason, promise) => {
+  console.error(`🚫 Critical Error detected:\n\n`, reason, promise);
+});
+
+process.on('uncaughtException', (error, origin) => {
+  console.error(`🚫 Critical Error detected:\n\n`, error, origin);
+});
