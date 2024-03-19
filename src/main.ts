@@ -1,5 +1,3 @@
-import './consoleOverride.js';
-
 import { ApplicationCommandRegistries, SapphireClient } from '@sapphire/framework';
 import { GatewayIntentBits } from 'discord.js';
 import fastify from 'fastify';
