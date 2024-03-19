@@ -33,7 +33,7 @@ content = """
 Under the settings cog in the video player, you can find the download setting.
 
 **If the option mentions downloading a playlist, then you'll be downloading a HLS playlist, you can play this file using VLC.**
-Currently, the only source that supports downloading an MP4 file is Showbox, but this source is not available if you're using the public proxy.
+Currently, the only sources that support downloading an MP4 file are Showbox and HDrezka. Both are accessible via extension, with Showbox also being available through a non-Cloudflare proxy.
 """
 
 [episodes]
@@ -88,14 +88,6 @@ content = """
 The movie you are trying to watch only came out in theatres very recently. We don't control our content, and it is not possible for us to show movies that haven't come out on streaming yet. 
 
 We also won't point you to any other sources, so you're best off going to the actual movie theatre or waiting until it comes out on streaming. Asking for or providing other sources is against the rules and will result in a ban.
-"""
-
-[squeezebox]
-isContextEnabled = true
-content = """
-# What is the new domain? Why did the site stop working?
-
-The site has moved to https://movie-web.app. The old domain is no longer functional. It stopped working because we moved to a new domain. Update your bookmarks, tell your friends! Don't ask us restore functionality to the old link, or else 😈
 """
 
 [showbox]
