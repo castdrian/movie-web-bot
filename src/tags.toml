@@ -33,7 +33,7 @@ content = """
 Under the settings cog in the video player, you can find the download setting.
 
 **If the option mentions downloading a playlist, then you'll be downloading a HLS playlist, you can play this file using VLC.**
-Currently, the only source that supports downloading an MP4 file is Showbox, but this source is not available if you're using the public proxy.
+Currently, the only sources that support downloading an MP4 file are Showbox and HDrezka. Both are accessible via extension, with Showbox also being available through a non-Cloudflare proxy.
 """
 
 [episodes]

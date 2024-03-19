@@ -19,7 +19,10 @@ export class InfoCommand extends Command {
       };
 
       const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder().setLabel('Discord').setStyle(ButtonStyle.Link).setURL('https://discord.gg/yjbNqREnAY'),
+        new ButtonBuilder()
+          .setLabel('Discord')
+          .setStyle(ButtonStyle.Link)
+          .setURL('https://movie-web.github.io/links/discord'),
         new ButtonBuilder()
           .setLabel('GitHub')
           .setStyle(ButtonStyle.Link)
