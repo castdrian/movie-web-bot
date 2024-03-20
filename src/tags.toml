@@ -95,8 +95,8 @@ isContextEnabled = true
 content = """
 # What happened to Showbox/Febbox?
 
-[Showbox/Febbox is no longer supported on our public proxies](<https://discord.com/channels/871713465100816424/1116430057922121760/1194388487424708788>), meaning that you have to host one yourself.
-Doing so is simple and can be done for free and within 5 minutes, see [here](<https://docs.movie-web.app/proxy/deploy>).
+[Showbox/Febbox only works through a non-cloudfare proxy](<https://discord.com/channels/871713465100816424/1116430057922121760/1194388487424708788>) or through the movie-web extension. Meaning you can either use the movie-web extension, host your own proxy, or utilise an instance of movie-web that has a non-cloudflare proxy integrated into it.
+Hosting your own proxy is simple and can be done for free and within 5 minutes, see [here](<https://movie-web.github.io/docs/proxy/deploy>).
 
 If you need any extra help with setting up a custom proxy, you can ask for help in the [#custom-proxy](<https://discord.com/channels/871713465100816424/1194388816279113798>) channel.
 """
