@@ -22,9 +22,10 @@ export class AvailableCommand extends Command {
       let episode: number | undefined;
 
       if (type === 'tv') {
-        season = interaction.options.getInteger('season') ?? undefined;
+        const seasonOption = interaction.options.getInteger('season', false);
+        season = seasonOption !== null ? seasonOption : 1; 
         episode = interaction.options.getInteger('episode') ?? undefined;
-      }
+      } 
 
       const scrapeMedia = transformSearchResultToScrapeMedia(type, result, season, episode);
 
